@@ -1,0 +1,77 @@
+:root {
+    color-scheme: dark;
+}
+
+body {
+    text-rendering: optimizeLegibility;
+}
+
+.mesh-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(72px);
+    opacity: 0.42;
+    mix-blend-mode: screen;
+    will-change: transform;
+    animation: blobDrift 32s ease-in-out infinite alternate;
+}
+
+.mesh-blob-1 {
+    width: 34rem;
+    height: 34rem;
+    top: 8%;
+    left: -6%;
+    background: radial-gradient(circle at center, rgba(99, 102, 241, 0.9), rgba(99, 102, 241, 0));
+}
+
+.mesh-blob-2 {
+    width: 30rem;
+    height: 30rem;
+    top: 18%;
+    right: -4%;
+    background: radial-gradient(circle at center, rgba(147, 51, 234, 0.88), rgba(147, 51, 234, 0));
+    animation-delay: -10s;
+}
+
+.mesh-blob-3 {
+    width: 28rem;
+    height: 28rem;
+    bottom: 8%;
+    left: 40%;
+    background: radial-gradient(circle at center, rgba(59, 130, 246, 0.85), rgba(59, 130, 246, 0));
+    animation-delay: -18s;
+}
+
+.wave-float {
+    animation: waveFloat 11s ease-in-out infinite;
+}
+
+@keyframes blobDrift {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+        transform: translate3d(12px, -20px, 0) scale(1.05);
+    }
+    100% {
+        transform: translate3d(-16px, 10px, 0) scale(0.98);
+    }
+}
+
+@keyframes waveFloat {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(4px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mesh-blob,
+    .wave-float,
+    .animate-bounce {
+        animation: none !important;
+    }
+}
