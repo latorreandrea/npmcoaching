@@ -1,10 +1,26 @@
 document.addEventListener('DOMContentLoaded', () => {
+    let aosResizeTimer;
+
     if (window.AOS) {
         AOS.init({
-            once: true,
-            duration: 850,
+            once: false,
+            mirror: true,
+            duration: 900,
             easing: 'ease-out-cubic',
-            offset: 20,
+            offset: 40,
+            anchorPlacement: 'top-bottom',
+            throttleDelay: 50,
+        });
+
+        window.addEventListener('load', () => {
+            AOS.refreshHard();
+        });
+
+        window.addEventListener('resize', () => {
+            window.clearTimeout(aosResizeTimer);
+            aosResizeTimer = window.setTimeout(() => {
+                AOS.refresh();
+            }, 180);
         });
     }
 
