@@ -1,50 +1,23 @@
-<header
-    id="site-navbar"
-    x-data="navbar()"
-    x-init="init()"
-    :class="scrolled ? 'bg-white/70 backdrop-blur-md shadow-lg border-b border-slate-200/60' : 'bg-transparent'"
-    class="fixed inset-x-0 top-0 z-50 transition-all duration-300"
->
-    <nav class="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4 md:px-8">
-        <a href="#home" class="text-lg font-extrabold tracking-tight md:text-xl" :class="scrolled ? 'text-slate-900' : 'text-white'">Coaching</a>
+<header id="site-navbar" class="fixed-top">
+    <nav class="navbar navbar-expand-lg premium-navbar">
+        <div class="container py-2 py-lg-3">
+            <a class="navbar-brand premium-brand" href="{% url 'home-index' %}">Coaching</a>
 
-        <div class="hidden items-center gap-8 md:flex" :class="scrolled ? 'text-slate-700' : 'text-slate-100'">
-            <a href="#metodo" class="text-sm font-medium transition hover:text-indigo-500">Metodo</a>
-            <a href="#test" class="text-sm font-medium transition hover:text-indigo-500">Test</a>
-            <a href="#testimonials" class="text-sm font-medium transition hover:text-indigo-500">Testimonianze</a>
-            <a href="#final-cta" class="rounded-full bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:scale-105 hover:bg-indigo-600">Inizia ora</a>
+            <button class="navbar-toggler premium-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-4 mt-3 mt-lg-0">
+                    <li class="nav-item"><a href="{% url 'home-index' %}" data-nav-target="home" class="nav-link premium-nav-link {% if request.path == '/' %}is-active{% endif %}">Home</a></li>
+                    <li class="nav-item"><a href="#metodo" data-nav-target="metodo" class="nav-link premium-nav-link">Metodo</a></li>
+                    <li class="nav-item"><a href="#test" data-nav-target="test" class="nav-link premium-nav-link">Test</a></li>
+                    <li class="nav-item"><a href="#testimonials" data-nav-target="testimonials" class="nav-link premium-nav-link">Testimonianze</a></li>
+                    <li class="nav-item mt-2 mt-lg-0 ms-lg-2">
+                        <a href="#final-cta" class="btn btn-primary premium-cta-btn">Inizia ora</a>
+                    </li>
+                </ul>
+            </div>
         </div>
-
-        <button
-            @click="mobileOpen = !mobileOpen"
-            type="button"
-            class="group inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/25 text-white backdrop-blur md:hidden"
-            :class="scrolled ? 'border-slate-300 text-slate-900' : 'border-white/30 text-white'"
-            aria-label="Toggle menu"
-        >
-            <span class="relative h-4 w-5">
-                <span class="absolute left-0 top-0 h-0.5 w-5 rounded bg-current transition-transform duration-300" :class="mobileOpen ? 'translate-y-[7px] rotate-45' : ''"></span>
-                <span class="absolute left-0 top-[7px] h-0.5 w-5 rounded bg-current transition-opacity duration-300" :class="mobileOpen ? 'opacity-0' : 'opacity-100'"></span>
-                <span class="absolute left-0 top-[14px] h-0.5 w-5 rounded bg-current transition-transform duration-300" :class="mobileOpen ? '-translate-y-[7px] -rotate-45' : ''"></span>
-            </span>
-        </button>
     </nav>
-
-    <div
-        x-show="mobileOpen"
-        x-transition:enter="transition ease-out duration-200"
-        x-transition:enter-start="opacity-0 -translate-y-2"
-        x-transition:enter-end="opacity-100 translate-y-0"
-        x-transition:leave="transition ease-in duration-150"
-        x-transition:leave-start="opacity-100 translate-y-0"
-        x-transition:leave-end="opacity-0 -translate-y-2"
-        class="mx-4 mb-4 rounded-2xl border border-white/20 bg-slate-900/85 p-5 backdrop-blur-md md:hidden"
-    >
-        <div class="flex flex-col gap-4 text-sm font-medium text-slate-200">
-            <a @click="mobileOpen = false" href="#metodo" class="transition hover:text-indigo-300">Metodo</a>
-            <a @click="mobileOpen = false" href="#test" class="transition hover:text-indigo-300">Test</a>
-            <a @click="mobileOpen = false" href="#testimonials" class="transition hover:text-indigo-300">Testimonianze</a>
-            <a @click="mobileOpen = false" href="#final-cta" class="rounded-full bg-indigo-500 px-4 py-2 text-center font-semibold text-white transition hover:bg-indigo-600">Inizia ora</a>
-        </div>
-    </div>
 </header>
