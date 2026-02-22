@@ -1,5 +1,6 @@
-# npmcoaching
-first prototype
+# NunziaPia Coaching Platform
+
+A professional Django web application for NunziaPia's coaching services, featuring user authentication, social login, personality assessments, and personalized coaching experiences.
 
 ## Table of Contents
 
@@ -21,6 +22,9 @@ first prototype
   - [Surface](#surface)
 - [Features](#features)
   - [Existing Features](#existing-features)
+    - [Animated Landing Page](#animated-landing-page)
+    - [User Registration](#user-registration)
+    - [User Login](#user-login)
   - [Features Left to Implement](#features-left-to-implement)
 - [Technologies Used](#technologies-used)
 - [Testing](#testing)
@@ -536,6 +540,86 @@ By following these established patterns and conventions, users can rely on their
 ## Features
 
 ### Existing Features
+
+#### Animated Landing Page
+
+The platform features a modern, animated landing page designed to engage visitors and clearly communicate NunziaPia's coaching services.
+
+**Key Features:**
+- Smooth scroll animations using AOS (Animate On Scroll) library
+- Responsive design that adapts seamlessly across devices (mobile, tablet, desktop)
+- Clear value proposition in the hero section with custom pill-shaped eyebrow badge
+- Professional testimonials section to build trust
+- Coaching method explanation ("Il Metodo") with visual presentation
+- Call-to-action buttons strategically placed throughout the page
+- GDPR-compliant cookie consent banner
+- Legal pages easily accessible from footer (Privacy Policy, Cookie Policy, Terms of Service)
+
+**Navigation:**
+- Fixed navbar with smooth transitions
+- Mobile-friendly hamburger menu
+- Dynamic authentication links (Login/Signup for guests, Profile/Logout for authenticated users)
+- Staff users see additional "Admin" link to access Django admin panel
+
+#### User Registration
+
+Users can create an account using multiple authentication methods, providing flexibility and convenience.
+
+**Registration Options:**
+- **Email/Password Registration:** Traditional signup with email and password
+  - Clean, custom-styled registration form
+  - Password confirmation for security
+  - Email verification system (optional in development, mandatory in production)
+  - Bootstrap 5 form validation with inline error messages
+  
+- **Social Account Registration:** One-click signup with social providers
+  - Google account registration
+  - LinkedIn account registration
+  - Facebook account registration
+  - Instagram account registration
+  - Automatic profile data population from social provider
+  - Seamless account creation on first social login
+
+**Features:**
+- All registration forms styled to match the site's design system
+- Clear switching between registration and login pages
+- Redirect management to intended destination after successful registration
+- Secure password handling with Django's built-in security features
+- CSRF protection on all forms
+
+#### User Login
+
+Authenticated users can securely access their personalized dashboard using their preferred authentication method.
+
+**Login Options:**
+- **Email/Password Login:** Traditional authentication
+  - Simple login form with email and password fields
+  - "Remember me" functionality for persistent sessions
+  - Password recovery system
+  - Clear error messages for failed login attempts
+  
+- **Social Account Login:** Quick access via OAuth 2.0 providers
+  - Google OAuth 2.0 login
+  - LinkedIn OAuth 2.0 login
+  - Facebook OAuth login
+  - Instagram OAuth login (via Facebook app)
+  - One-click authentication for returning users
+  - Secure OAuth callback handling
+
+**Security Features:**
+- Session management with secure cookies (in production)
+- HTTPS enforcement in production environment
+- CSRF protection on all authentication forms
+- Secure password storage using Django's hashing algorithms
+- OAuth credentials stored securely in database (never in code)
+
+**User Experience:**
+- Clean, professional login interface matching site design
+- Responsive form layout works on all devices
+- Clear navigation between login and signup pages
+- Automatic redirect to user profile after successful login
+- Staff users redirected to admin dashboard when appropriate
+- Logout functionality accessible from navbar
 
 ### Features Left to Implement
 
