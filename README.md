@@ -623,7 +623,115 @@ Authenticated users can securely access their personalized dashboard using their
 
 ### Features Left to Implement
 
+Future enhancements planned for the platform:
+
+**Phase 2 - Enhanced User Experience:**
+- Complete personality profile visualization with charts and graphs
+- User test history and tracking
+- PDF report generation and download
+- Password recovery system
+- Enhanced account settings and profile management
+
+**Phase 3 - Personalization:**
+- Personalized coaching suggestions based on user profiles
+- Profile comparison over time
+- Coaching session request system
+- Email follow-up automation
+- Enhanced analytics dashboard for coaches
+
+**Phase 4 - Advanced Features:**
+- Dynamic test creation and modification tools for coaches
+- Direct messaging between users and coach
+- Booking/scheduling system
+- Advanced CRM features for client management
+- Performance optimizations
+- Mobile app considerations
+
 ## Technologies Used
+
+### Backend Framework & Core
+
+- **Python 3.11** - High-level programming language for backend development
+- **Django 5.2.11** - Full-stack web framework providing ORM, admin interface, authentication, and security features
+- **django-allauth 65.14.3** - Comprehensive authentication solution supporting email/password and OAuth social login
+- **WSGI** - Web Server Gateway Interface for deploying Python web applications
+
+### Database
+
+- **SQLite** - Lightweight SQL database engine used for local development
+- **PostgreSQL** - Advanced open-source relational database used in production
+- **Neon** - Serverless PostgreSQL database platform with auto-scaling and branching capabilities
+  - Connection pooling for efficient database connections
+  - Automatic suspend/resume to reduce costs
+  - SSL/TLS encryption for secure connections
+
+### Frontend Technologies
+
+- **HTML5** - Semantic markup for structuring content
+- **CSS3** - Custom styling for brand identity and responsive design
+- **JavaScript (ES6+)** - Client-side interactivity and dynamic behavior
+- **Bootstrap 5.3.3** - Responsive CSS framework for consistent UI components
+  - Grid system for responsive layouts
+  - Form components and validation
+  - Navigation components
+  - Utility classes
+- **AOS (Animate On Scroll)** - JavaScript library for scroll-triggered animations
+  - Fade, slide, and zoom effects
+  - Configurable animation timing and delays
+
+### Authentication & OAuth Providers
+
+- **Google OAuth 2.0** - Social authentication via Google accounts
+- **LinkedIn OAuth 2.0** - Professional network authentication
+- **Facebook OAuth** - Social media authentication
+- **Instagram OAuth** - Instagram account authentication (via Facebook app)
+- **django.contrib.auth** - Django's built-in authentication system
+- **Session Management** - Secure session handling with cookie-based storage
+
+### Security Libraries
+
+- **cryptography 46.0.5** - Low-level cryptographic primitives for OAuth
+- **PyJWT 2.11.0** - JSON Web Token implementation for secure token handling
+- **requests 2.32.5** - HTTP library for OAuth callback handling
+- **certifi 2026.1.4** - Root certificates for SSL/TLS verification
+
+### Development Tools
+
+- **pip 26.0.1** - Python package installer for dependency management
+- **venv** - Python virtual environment for isolated development
+- **Git** - Version control system for code management
+- **SQLparse 0.5.5** - SQL formatting and parsing library
+
+### Deployment & Infrastructure
+
+- **Google Cloud Run** - Serverless container platform for production hosting
+  - Automatic scaling based on traffic
+  - Pay-per-use pricing model
+  - HTTPS endpoints with SSL certificates
+  - Container-based deployment
+- **Google Cloud Build** - CI/CD pipeline for automated deployments
+- **Docker** - Containerization (implicit with Cloud Run)
+- **Gunicorn** - Production WSGI HTTP server (or similar for Django on Cloud Run)
+
+### Data Parsing & Processing
+
+- **charset-normalizer 3.4.4** - Character encoding detection
+- **urllib3 2.6.3** - HTTP client library
+- **idna 3.11** - Internationalized Domain Names in Applications support
+- **cffi 2.0.0** - Foreign Function Interface for calling C code
+
+### Additional Django Components
+
+- **django.contrib.sites** - Multi-site support for handling different domains
+- **django.contrib.staticfiles** - Static file management and serving
+- **asgiref 3.11.1** - ASGI (Asynchronous Server Gateway Interface) specification
+- **MarkupSafe 3.0.3** - Safe string handling for template rendering
+- **sqlparse** - SQL statement parsing and formatting
+- **tzdata 2025.3** - Timezone database for accurate datetime handling
+
+### Package Management
+
+All dependencies are tracked in `requirements.txt` for reproducible builds and deployments.
 
 ## Testing
 
