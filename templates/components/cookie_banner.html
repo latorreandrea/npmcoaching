@@ -1,0 +1,55 @@
+<div id="cookie-consent" class="cookie-consent" role="dialog" aria-modal="false" aria-labelledby="cookie-consent-title" aria-describedby="cookie-consent-desc" hidden>
+    <div class="cookie-consent-card">
+        <div class="cookie-consent-main">
+            <h2 id="cookie-consent-title" class="cookie-consent-title">Preferenze Cookie</h2>
+            <p id="cookie-consent-desc" class="cookie-consent-text">
+                Utilizziamo cookie tecnici necessari e, previo consenso, cookie analitici e di personalizzazione per migliorare la tua esperienza e monitorare i progressi. I dati non vengono venduti a terze parti.
+            </p>
+            <p class="cookie-consent-text mb-0">
+                Maggiori dettagli nella <a href="{% url 'cookie-policy' %}">Cookie Policy</a>.
+            </p>
+        </div>
+
+        <div class="cookie-consent-actions">
+            <button type="button" class="btn btn-outline-secondary cookie-btn" data-cookie-action="reject">Rifiuta non necessari</button>
+            <button type="button" class="btn btn-primary cookie-btn" data-cookie-action="accept">Accetta tutti</button>
+            <button type="button" class="btn btn-link cookie-settings-toggle" data-cookie-action="customize" aria-expanded="false" aria-controls="cookie-settings-panel">Personalizza</button>
+        </div>
+
+        <div id="cookie-settings-panel" class="cookie-settings" hidden>
+            <div class="cookie-setting-item">
+                <div>
+                    <h3>Cookie tecnici necessari</h3>
+                    <p>Sempre attivi per il funzionamento base del sito.</p>
+                </div>
+                <span class="cookie-badge">Sempre attivi</span>
+            </div>
+
+            <div class="cookie-setting-item">
+                <div>
+                    <h3>Cookie analitici</h3>
+                    <p>Aiutano a capire utilizzo e performance per migliorare il servizio.</p>
+                </div>
+                <div class="form-check form-switch m-0">
+                    <input class="form-check-input" type="checkbox" role="switch" id="consent-analytics">
+                    <label class="visually-hidden" for="consent-analytics">Abilita cookie analitici</label>
+                </div>
+            </div>
+
+            <div class="cookie-setting-item">
+                <div>
+                    <h3>Cookie di personalizzazione</h3>
+                    <p>Permettono di adattare i contenuti e tracciare i tuoi progressi nel percorso.</p>
+                </div>
+                <div class="form-check form-switch m-0">
+                    <input class="form-check-input" type="checkbox" role="switch" id="consent-marketing">
+                    <label class="visually-hidden" for="consent-marketing">Abilita cookie di personalizzazione</label>
+                </div>
+            </div>
+
+            <div class="cookie-settings-actions">
+                <button type="button" class="btn btn-primary cookie-btn" data-cookie-action="save">Salva preferenze</button>
+            </div>
+        </div>
+    </div>
+</div>

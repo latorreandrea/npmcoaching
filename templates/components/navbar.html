@@ -1,20 +1,20 @@
 <header id="site-navbar" class="fixed-top">
-    <nav class="navbar navbar-expand-lg premium-navbar">
+    <nav class="navbar navbar-expand-lg glass-navbar">
         <div class="container py-2 py-lg-3">
-            <a class="navbar-brand premium-brand" href="{% url 'home-index' %}">Coaching</a>
+            <a class="navbar-brand brand-mark" href="{% url 'home-index' %}">NunziaPia Coaching</a>
 
-            <button class="navbar-toggler premium-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler nav-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="mainNavbar">
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-4 mt-3 mt-lg-0">
-                    <li class="nav-item"><a href="{% url 'home-index' %}" data-nav-target="home" class="nav-link premium-nav-link {% if request.path == '/' %}is-active{% endif %}">Home</a></li>
-                    <li class="nav-item"><a href="#metodo" data-nav-target="metodo" class="nav-link premium-nav-link">Metodo</a></li>
-                    <li class="nav-item"><a href="#test" data-nav-target="test" class="nav-link premium-nav-link">Test</a></li>
-                    <li class="nav-item"><a href="#testimonials" data-nav-target="testimonials" class="nav-link premium-nav-link">Testimonianze</a></li>
+                    <li class="nav-item"><a href="{% url 'home-index' %}" data-nav-target="home" class="nav-link nav-link-ux {% if request.path == '/' %}is-active{% endif %}">Home</a></li>
+                    <li class="nav-item"><a href="#metodo" data-nav-target="metodo" class="nav-link nav-link-ux">Metodo</a></li>
+                    <li class="nav-item"><a href="#test" data-nav-target="test" class="nav-link nav-link-ux">Test</a></li>
+                    <li class="nav-item"><a href="#testimonials" data-nav-target="testimonials" class="nav-link nav-link-ux">Testimonianze</a></li>
                     <li class="nav-item mt-2 mt-lg-0 ms-lg-2">
-                        <a href="#final-cta" class="btn btn-primary premium-cta-btn">Inizia ora</a>
+                        <a href="#final-cta" class="btn btn-primary cta-btn-main">Prenota una call</a>
                     </li>
                 </ul>
             </div>
