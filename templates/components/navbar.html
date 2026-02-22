@@ -13,9 +13,20 @@
                     <li class="nav-item"><a href="#metodo" data-nav-target="metodo" class="nav-link nav-link-ux">Metodo</a></li>
                     <li class="nav-item"><a href="#test" data-nav-target="test" class="nav-link nav-link-ux">Test</a></li>
                     <li class="nav-item"><a href="#testimonials" data-nav-target="testimonials" class="nav-link nav-link-ux">Testimonianze</a></li>
-                    <li class="nav-item mt-2 mt-lg-0 ms-lg-2">
-                        <a href="#final-cta" class="btn btn-primary cta-btn-main">Prenota una call</a>
-                    </li>
+                    {% if request.user.is_authenticated %}
+                        <li class="nav-item"><a href="{% url 'accounts:profile' %}" class="nav-link nav-link-ux">Profilo</a></li>
+                        {% if request.user.is_staff %}
+                            <li class="nav-item"><a href="{% url 'accounts:admin-dashboard' %}" class="nav-link nav-link-ux">Admin</a></li>
+                        {% endif %}
+                        <li class="nav-item mt-2 mt-lg-0 ms-lg-1">
+                            <a href="{% url 'account_logout' %}" class="btn btn-outline-secondary cta-btn-main">Esci</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item"><a href="{% url 'account_login' %}" class="nav-link nav-link-ux">Accedi</a></li>
+                        <li class="nav-item mt-2 mt-lg-0 ms-lg-1">
+                            <a href="{% url 'account_signup' %}" class="btn btn-primary cta-btn-main">Registrati</a>
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>

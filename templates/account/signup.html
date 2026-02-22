@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load socialaccount %}
+
+{% block content %}
+<section class="section section-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="insight-card auth-card">
+                    <p class="section-kicker">Account</p>
+                    <h1 class="section-title auth-title">Crea il tuo account</h1>
+                    <p class="section-description auth-subtitle">Registrati per iniziare il tuo percorso.</p>
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'account_signup' %}" class="auth-form mt-4">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_email" class="form-label">Email</label>
+                            <input type="email" name="email" id="id_email" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_password1" class="form-label">Password</label>
+                            <input type="password" name="password1" id="id_password1" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_password2" class="form-label">Conferma password</label>
+                            <input type="password" name="password2" id="id_password2" class="form-control" required>
+                        </div>
+
+                        {% if redirect_field_value %}
+                            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-primary action-btn w-100">Registrati</button>
+                    </form>
+
+                    <div class="auth-divider"><span>oppure registrati con</span></div>
+
+                    <div class="d-grid gap-2 auth-social-grid">
+                        <a class="btn btn-outline-secondary auth-social-btn" href="{% provider_login_url 'google' process='login' %}">Google</a>
+                        <a class="btn btn-outline-secondary auth-social-btn" href="{% provider_login_url 'linkedin_oauth2' process='login' %}">LinkedIn</a>
+                        <a class="btn btn-outline-secondary auth-social-btn" href="{% provider_login_url 'facebook' process='login' %}">Facebook</a>
+                        <a class="btn btn-outline-secondary auth-social-btn" href="{% provider_login_url 'instagram' process='login' %}">Instagram</a>
+                    </div>
+
+                    <p class="mt-4 mb-0 text-center auth-link-row">
+                        Hai già un account? <a href="{% url 'account_login' %}">Accedi</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

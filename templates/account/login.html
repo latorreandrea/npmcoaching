@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load socialaccount %}
+
+{% block content %}
+<section class="section section-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="insight-card auth-card">
+                    <p class="section-kicker">Account</p>
+                    <h1 class="section-title auth-title">Accedi</h1>
+                    <p class="section-description auth-subtitle">Accedi al tuo spazio personale.</p>
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'account_login' %}" class="auth-form mt-4">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_login" class="form-label">Email</label>
+                            <input type="email" name="login" id="id_login" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label">Password</label>
+                            <input type="password" name="password" id="id_password" class="form-control" required>
+                        </div>
+
+                        {% if redirect_field_value %}
+                            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-primary action-btn w-100">Accedi</button>
+                    </form>
+
+                    <div class="auth-divider"><span>oppure continua con</span></div>
+
+                    <div class="d-grid gap-2 auth-social-grid">
+                        <a class="btn btn-outline-secondary auth-social-btn" href="{% provider_login_url 'google' process='login' %}">Google</a>
+                        <a class="btn btn-outline-secondary auth-social-btn" href="{% provider_login_url 'linkedin_oauth2' process='login' %}">LinkedIn</a>
+                        <a class="btn btn-outline-secondary auth-social-btn" href="{% provider_login_url 'facebook' process='login' %}">Facebook</a>
+                        <a class="btn btn-outline-secondary auth-social-btn" href="{% provider_login_url 'instagram' process='login' %}">Instagram</a>
+                    </div>
+
+                    <p class="mt-4 mb-0 text-center auth-link-row">
+                        Non hai un account? <a href="{% url 'account_signup' %}">Registrati</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

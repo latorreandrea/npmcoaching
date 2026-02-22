@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section section-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <p class="section-kicker">Admin</p>
+                <h1 class="section-title">Dashboard amministratore</h1>
+                <div class="insight-card mt-4">
+                    <p>Questa area è visibile solo agli utenti admin/staff.</p>
+                    <a href="/admin/" class="btn btn-primary action-btn mt-2">Apri Django Admin</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
