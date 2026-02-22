@@ -737,4 +737,30 @@ All dependencies are tracked in `requirements.txt` for reproducible builds and d
 
 ## Deployment
 
+### Static files on Google Cloud Storage (Cloud Run)
+
+The project supports serving static files from Google Cloud Storage via `django-storages`.
+
+Set these environment variables in your Cloud Run service:
+
+- `DJANGO_USE_GCS_STATIC=True`
+- `DJANGO_USE_GCS_MEDIA=True` (if you also want uploaded files on GCS)
+- `GS_BUCKET_NAME=<your-default-gcs-bucket-name>`
+
+Optional (if you want separate buckets):
+
+- `GS_STATIC_BUCKET_NAME=<your-static-bucket-name>`
+- `GS_MEDIA_BUCKET_NAME=<your-media-bucket-name>`
+
+Then run:
+
+```bash
+python manage.py collectstatic --noinput
+```
+
+Notes:
+- In local development, keep `DJANGO_USE_GCS_STATIC=False` (default) to use local static files.
+- In local development, keep `DJANGO_USE_GCS_MEDIA=False` (default) to use local media files.
+- Ensure the Cloud Run service account has permission to write/read objects in the target bucket.
+
 ## Credits

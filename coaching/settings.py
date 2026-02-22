@@ -8,6 +8,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
+USE_GCS_STATIC = os.environ.get('DJANGO_USE_GCS_STATIC', 'False').lower() in ('1', 'true', 'yes')
+USE_GCS_MEDIA = os.environ.get('DJANGO_USE_GCS_MEDIA', 'False').lower() in ('1', 'true', 'yes')
 
 if not SECRET_KEY:
     if DEBUG:
@@ -52,6 +54,9 @@ INSTALLED_APPS = [
     'home',
     'accounts',
 ]
+
+if USE_GCS_STATIC or USE_GCS_MEDIA:
+    INSTALLED_APPS.append('storages')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -157,6 +162,56 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+if USE_GCS_STATIC or USE_GCS_MEDIA:
+    gs_default_bucket = os.environ.get('GS_BUCKET_NAME', '').strip()
+    gs_static_bucket = os.environ.get('GS_STATIC_BUCKET_NAME', gs_default_bucket).strip()
+    gs_media_bucket = os.environ.get('GS_MEDIA_BUCKET_NAME', gs_default_bucket).strip()
+
+    if USE_GCS_STATIC and not gs_static_bucket:
+        raise ImproperlyConfigured(
+            'GS_STATIC_BUCKET_NAME (or GS_BUCKET_NAME) is required when DJANGO_USE_GCS_STATIC is enabled'
+        )
+    if USE_GCS_MEDIA and not gs_media_bucket:
+        raise ImproperlyConfigured(
+            'GS_MEDIA_BUCKET_NAME (or GS_BUCKET_NAME) is required when DJANGO_USE_GCS_MEDIA is enabled'
+        )
+
+    GS_DEFAULT_ACL = None
+    GS_QUERYSTRING_AUTH = False
+
+    STORAGES = {
+        'default': {
+            'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        },
+    }
+
+    if USE_GCS_STATIC:
+        STORAGES['staticfiles'] = {
+            'BACKEND': 'storages.backends.gcloud.GoogleCloudStorage',
+            'OPTIONS': {
+                'bucket_name': gs_static_bucket,
+                'location': 'static',
+                'default_acl': GS_DEFAULT_ACL,
+                'querystring_auth': GS_QUERYSTRING_AUTH,
+            },
+        }
+        STATIC_URL = f'https://storage.googleapis.com/{gs_static_bucket}/static/'
+
+    if USE_GCS_MEDIA:
+        STORAGES['default'] = {
+            'BACKEND': 'storages.backends.gcloud.GoogleCloudStorage',
+            'OPTIONS': {
+                'bucket_name': gs_media_bucket,
+                'location': 'media',
+                'default_acl': GS_DEFAULT_ACL,
+                'querystring_auth': GS_QUERYSTRING_AUTH,
+            },
+        }
+        MEDIA_URL = f'https://storage.googleapis.com/{gs_media_bucket}/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
