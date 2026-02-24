@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.instagram',
     'home',
     'accounts',
+    'assessments',
 ]
 
 if USE_GCS_STATIC or USE_GCS_MEDIA:

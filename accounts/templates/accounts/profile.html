@@ -12,9 +12,10 @@
                     {% if request.user.is_superuser %}
                         <p><strong>Ruolo:</strong> Admin</p>
                     {% endif %}
-                    <a href="{% url 'accounts:tests-list' %}" class="btn btn-primary action-btn mt-2">Vai ai test</a>
+                    <a href="{% url 'assessments:tests-list' %}" class="btn btn-primary action-btn mt-2">Vai ai test</a>
                     {% if request.user.is_superuser %}
                         <a href="{% url 'accounts:admin-dashboard' %}" class="btn btn-primary action-btn mt-2">Vai alla dashboard admin</a>
+                        <a href="{% url 'assessments:admin-test-builder' %}" class="btn btn-primary action-btn mt-2">Gestisci test (pagina custom)</a>
                     {% endif %}
                 </div>
             </div>

@@ -16,7 +16,7 @@
                                 {% if test.description %}
                                     <p>{{ test.description }}</p>
                                 {% endif %}
-                                <a href="{% url 'accounts:take-test' test.id %}" class="btn btn-primary action-btn mt-2">Inizia test</a>
+                                <a href="{% url 'assessments:take-test' test.id %}" class="btn btn-primary action-btn mt-2">Inizia test</a>
                             </div>
                         {% endfor %}
                     </div>
