@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section section-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <p class="section-kicker">Risultato</p>
+                <h1 class="section-title">Esito test: {{ result.test.title }}</h1>
+
+                <div class="insight-card mt-4">
+                    <p><strong>Punteggio totale:</strong> {{ result.score }}</p>
+
+                    {% if result.personality %}
+                        <p><strong>Personalità:</strong> {{ result.personality.name }}</p>
+                        {% if result.personality.description %}
+                            <p>{{ result.personality.description }}</p>
+                        {% endif %}
+                    {% else %}
+                        <p>Non è stato trovato un profilo di personalità per questo punteggio. Verifica i range in area admin.</p>
+                    {% endif %}
+
+                    <a href="{% url 'accounts:tests-list' %}" class="btn btn-primary action-btn mt-2">Torna ai test</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

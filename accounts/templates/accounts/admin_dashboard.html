@@ -1,18 +1,34 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="section section-light">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <p class="section-kicker">Admin</p>
-                <h1 class="section-title">Dashboard amministratore</h1>
-                <div class="insight-card mt-4">
-                    <p>Questa area è visibile solo agli utenti admin/staff.</p>
-                    <a href="/admin/" class="btn btn-primary action-btn mt-2">Apri Django Admin</a>
+{% if request.user.is_superuser %}
+    <section class="section section-light">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <p class="section-kicker">Admin</p>
+                    <h1 class="section-title">Dashboard amministratore</h1>
+                    <div class="insight-card mt-4">
+                        <p>Questa area è visibile solo agli utenti admin (superuser).</p>
+                        <p>Da Django Admin puoi creare i test, aggiungere domande e impostare le risposte con punteggio.</p>
+                        <p>Configura anche i range di punteggio per associare la personalità finale.</p>
+                        <a href="/admin/" class="btn btn-primary action-btn mt-2">Apri Django Admin</a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
+{% else %}
+    <section class="section section-light">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="insight-card mt-4">
+                        <p>Non hai i permessi per visualizzare questa pagina.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endif %}
 {% endblock %}

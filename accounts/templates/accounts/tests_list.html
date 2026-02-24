@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section section-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <p class="section-kicker">Test</p>
+                <h1 class="section-title">I tuoi test di personalità</h1>
+
+                {% if tests %}
+                    <div class="mt-4 d-grid gap-3">
+                        {% for test in tests %}
+                            <div class="insight-card">
+                                <h3>{{ test.title }}</h3>
+                                {% if test.description %}
+                                    <p>{{ test.description }}</p>
+                                {% endif %}
+                                <a href="{% url 'accounts:take-test' test.id %}" class="btn btn-primary action-btn mt-2">Inizia test</a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="insight-card mt-4">
+                        <p>Al momento non ci sono test disponibili.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
