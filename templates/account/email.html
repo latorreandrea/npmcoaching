@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section section-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7 col-md-9">
+                <div class="insight-card auth-card">
+                    <p class="section-kicker">Account</p>
+                    <h1 class="section-title auth-title">Gestione email</h1>
+                    <p class="section-description auth-subtitle">Gestisci il tuo indirizzo email principale.</p>
+
+                    {% if user.emailaddress_set.all %}
+                        <form action="{% url 'account_email' %}" method="post" class="auth-form mt-4">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                {% for emailaddress in user.emailaddress_set.all %}
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="email" value="{{ emailaddress.email }}" id="email_radio_{{ forloop.counter }}" {% if emailaddress.primary %}checked{% endif %}>
+                                        <label class="form-check-label" for="email_radio_{{ forloop.counter }}">
+                                            {{ emailaddress.email }}
+                                            {% if emailaddress.verified %}(verificata){% else %}(non verificata){% endif %}
+                                            {% if emailaddress.primary %}(principale){% endif %}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-secondary" type="submit" name="action_primary">Imposta come principale</button>
+                                <button class="btn btn-outline-secondary" type="submit" name="action_send">Invia verifica</button>
+                                <button class="btn btn-danger" type="submit" name="action_remove">Rimuovi email</button>
+                            </div>
+                        </form>
+                    {% endif %}
+
+                    <hr class="my-4">
+
+                    <h2 class="h5">Aggiungi nuova email</h2>
+                    <form method="post" action="{% url 'account_email' %}" class="auth-form mt-3">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_email" class="form-label">Nuova email</label>
+                            <input type="email" name="email" id="id_email" class="form-control" required>
+                        </div>
+                        <button class="btn btn-primary action-btn w-100" type="submit" name="action_add">Aggiungi email</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

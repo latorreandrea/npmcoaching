@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<section class="section section-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="insight-card auth-card">
+                    <p class="section-kicker">Account</p>
+                    <h1 class="section-title auth-title">Completa la registrazione</h1>
+                    <p class="section-description auth-subtitle">Manca qualche informazione per completare l'accesso con {{ account.get_provider.name }}.</p>
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'socialaccount_signup' %}" class="auth-form mt-4">
+                        {% csrf_token %}
+
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                <input
+                                    type="{% if field.field.widget.input_type %}{{ field.field.widget.input_type }}{% else %}text{% endif %}"
+                                    name="{{ field.html_name }}"
+                                    id="{{ field.id_for_label }}"
+                                    class="form-control"
+                                    {% if field.value %}value="{{ field.value }}"{% endif %}
+                                    {% if field.field.required %}required{% endif %}
+                                >
+                                {% if field.errors %}
+                                    <div class="text-danger small mt-1">{{ field.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+
+                        {% if redirect_field_value %}
+                            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-primary action-btn w-100">Completa registrazione</button>
+                    </form>
+
+                    <p class="mt-4 mb-0 text-center auth-link-row">
+                        <a href="{% url 'account_login' %}">Torna al login</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

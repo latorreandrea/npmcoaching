@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section section-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="insight-card auth-card text-center">
+                    <p class="section-kicker">Account</p>
+                    <h1 class="section-title auth-title">Email non verificata</h1>
+                    <p class="section-description auth-subtitle">Per continuare devi prima verificare il tuo indirizzo email.</p>
+                    <a href="{% url 'account_email' %}" class="btn btn-primary action-btn w-100 mt-4">Gestisci email</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

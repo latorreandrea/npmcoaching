@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section section-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="insight-card auth-card text-center">
+                    <p class="section-kicker">Account</p>
+                    <h1 class="section-title auth-title">Conferma email</h1>
+
+                    {% if confirmation %}
+                        <p class="section-description auth-subtitle">Conferma l'indirizzo email associato al tuo account.</p>
+                        <form method="post" action="{% url 'account_confirm_email' confirmation.key %}" class="mt-4">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary action-btn w-100">Conferma email</button>
+                        </form>
+                    {% else %}
+                        <p class="section-description auth-subtitle">Il link di conferma non è valido o è scaduto.</p>
+                        <a href="{% url 'account_email' %}" class="btn btn-primary action-btn w-100 mt-4">Gestisci email</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

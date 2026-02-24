@@ -9,8 +9,9 @@
                 <h1 class="section-title">Il tuo profilo</h1>
                 <div class="insight-card mt-4">
                     <p><strong>Email:</strong> {{ request.user.email }}</p>
-                    <p><strong>Ruolo:</strong> {% if request.user.is_superuser %}Admin{% else %}User{% endif %}</p>
-                    <p><strong>Accesso effettuato:</strong> {{ request.user.is_authenticated|yesno:"Sì,No" }}</p>
+                    {% if request.user.is_superuser %}
+                        <p><strong>Ruolo:</strong> Admin</p>
+                    {% endif %}
                     <a href="{% url 'accounts:tests-list' %}" class="btn btn-primary action-btn mt-2">Vai ai test</a>
                     {% if request.user.is_superuser %}
                         <a href="{% url 'accounts:admin-dashboard' %}" class="btn btn-primary action-btn mt-2">Vai alla dashboard admin</a>
