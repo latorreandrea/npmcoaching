@@ -1,6 +1,7 @@
 from urllib.parse import urlencode
 
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Max
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
@@ -144,6 +145,8 @@ def admin_test_builder(request):
             if question_create_form.is_valid():
                 new_question = question_create_form.save(commit=False)
                 new_question.test = selected_test
+                max_order = selected_test.questions.aggregate(max_order=Max("order")).get("max_order") or 0
+                new_question.order = max_order + 1
                 new_question.save()
                 return _builder_redirect(test_id=selected_test.id, question_id=new_question.id)
 
@@ -157,11 +160,22 @@ def admin_test_builder(request):
             selected_question.delete()
             return _builder_redirect(test_id=selected_test.id)
 
+        elif action == "reorder_questions" and selected_test:
+            raw_ids = request.POST.get("ordered_question_ids", "")
+            ordered_ids = [int(item) for item in raw_ids.split(",") if item.isdigit()]
+            valid_ids = list(selected_test.questions.filter(id__in=ordered_ids).values_list("id", flat=True))
+            if ordered_ids and len(valid_ids) == len(ordered_ids):
+                for index, question_pk in enumerate(ordered_ids, start=1):
+                    Question.objects.filter(id=question_pk, test=selected_test).update(order=index)
+            return _builder_redirect(test_id=selected_test.id)
+
         elif action == "create_answer" and selected_question:
             answer_create_form = AnswerForm(request.POST, prefix="answer_create")
             if answer_create_form.is_valid():
                 new_answer = answer_create_form.save(commit=False)
                 new_answer.question = selected_question
+                max_order = selected_question.answers.aggregate(max_order=Max("order")).get("max_order") or 0
+                new_answer.order = max_order + 1
                 new_answer.save()
                 return _builder_redirect(test_id=selected_test.id, question_id=selected_question.id, answer_id=new_answer.id)
 
@@ -173,6 +187,15 @@ def admin_test_builder(request):
 
         elif action == "delete_answer" and selected_answer:
             selected_answer.delete()
+            return _builder_redirect(test_id=selected_test.id, question_id=selected_question.id)
+
+        elif action == "reorder_answers" and selected_question:
+            raw_ids = request.POST.get("ordered_answer_ids", "")
+            ordered_ids = [int(item) for item in raw_ids.split(",") if item.isdigit()]
+            valid_ids = list(selected_question.answers.filter(id__in=ordered_ids).values_list("id", flat=True))
+            if ordered_ids and len(valid_ids) == len(ordered_ids):
+                for index, answer_pk in enumerate(ordered_ids, start=1):
+                    Answer.objects.filter(id=answer_pk, question=selected_question).update(order=index)
             return _builder_redirect(test_id=selected_test.id, question_id=selected_question.id)
 
     context = {

@@ -17,19 +17,17 @@ class TestForm(forms.ModelForm):
 class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
-        fields = ["text", "order"]
+        fields = ["text"]
         widgets = {
             "text": forms.TextInput(attrs={"class": "form-control"}),
-            "order": forms.NumberInput(attrs={"class": "form-control"}),
         }
 
 
 class AnswerForm(forms.ModelForm):
     class Meta:
         model = Answer
-        fields = ["text", "points", "order"]
+        fields = ["text", "points"]
         widgets = {
             "text": forms.TextInput(attrs={"class": "form-control"}),
             "points": forms.NumberInput(attrs={"class": "form-control"}),
-            "order": forms.NumberInput(attrs={"class": "form-control"}),
         }

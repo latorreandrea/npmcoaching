@@ -1,7 +1,45 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="section section-light">
+<style>
+    .builder-section-no-top {
+        padding-top: 0 !important;
+    }
+
+    .builder-column-card {
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .builder-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+    .builder-add-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        font-size: 1.4rem;
+        line-height: 1;
+    }
+
+    .sortable-item {
+        cursor: grab;
+    }
+
+    .sortable-item:active {
+        cursor: grabbing;
+    }
+</style>
+
+<section class="section section-light builder-section-no-top">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
             <div>
@@ -13,124 +51,71 @@
 
         <div class="row g-4">
             <div class="col-lg-4">
-                <div class="insight-card h-100">
-                    <h3 class="h5">Test</h3>
+                <div class="insight-card builder-column-card">
+                    <div class="builder-title-row">
+                        <h3 class="h5 mb-0">Test</h3>
+                        <button type="button" class="btn btn-primary action-btn builder-add-btn" id="openCreateTestModal" aria-label="Crea test" title="Crea test">
+                            <span aria-hidden="true">+</span>
+                        </button>
+                    </div>
+
                     <div class="list-group mt-3 mb-4">
                         {% for test in tests %}
-                            <a href="?test={{ test.id }}" class="list-group-item list-group-item-action {% if selected_test and selected_test.id == test.id %}active{% endif %}">
+                            <button
+                                type="button"
+                                class="list-group-item list-group-item-action text-start sortable-item {% if selected_test and selected_test.id == test.id %}active{% endif %}"
+                                data-test-id="{{ test.id }}"
+                                data-test-title="{{ test.title|escapejs }}"
+                                data-test-description="{{ test.description|default:''|escapejs }}"
+                                data-test-active="{% if test.is_active %}1{% else %}0{% endif %}"
+                            >
                                 {{ test.title }}
-                            </a>
+                            </button>
                         {% empty %}
                             <div class="list-group-item">Nessun test creato.</div>
                         {% endfor %}
                     </div>
-
-                    <h4 class="h6">Crea nuovo test</h4>
-                    <form method="post" class="mb-4">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="create_test">
-
-                        <label class="form-label mt-2">Titolo</label>
-                        {{ test_create_form.title }}
-                        <div class="text-danger small">{{ test_create_form.title.errors|striptags }}</div>
-
-                        <label class="form-label mt-2">Descrizione</label>
-                        {{ test_create_form.description }}
-                        <div class="text-danger small">{{ test_create_form.description.errors|striptags }}</div>
-
-                        <div class="form-check mt-2">
-                            {{ test_create_form.is_active }}
-                            <label class="form-check-label">Test attivo</label>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary action-btn mt-3 w-100">Crea test</button>
-                    </form>
-
-                    {% if selected_test and test_edit_form %}
-                        <h4 class="h6">Modifica test selezionato</h4>
-                        <form method="post" class="mb-2">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="update_test">
-
-                            <label class="form-label mt-2">Titolo</label>
-                            {{ test_edit_form.title }}
-                            <div class="text-danger small">{{ test_edit_form.title.errors|striptags }}</div>
-
-                            <label class="form-label mt-2">Descrizione</label>
-                            {{ test_edit_form.description }}
-                            <div class="text-danger small">{{ test_edit_form.description.errors|striptags }}</div>
-
-                            <div class="form-check mt-2">
-                                {{ test_edit_form.is_active }}
-                                <label class="form-check-label">Test attivo</label>
-                            </div>
-
-                            <button type="submit" class="btn btn-outline-secondary mt-3 w-100">Salva modifica test</button>
-                        </form>
-                        <form method="post" onsubmit="return confirm('Eliminare questo test? Verranno eliminate anche domande e risposte collegate.');">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="delete_test">
-                            <button type="submit" class="btn btn-danger w-100">Elimina test</button>
-                        </form>
-                    {% endif %}
                 </div>
             </div>
 
             <div class="col-lg-4">
-                <div class="insight-card h-100">
-                    <h3 class="h5">Domande</h3>
+                <div class="insight-card builder-column-card">
+                    <div class="builder-title-row">
+                        <h3 class="h5 mb-0">Domande</h3>
+                        <button
+                            type="button"
+                            class="btn btn-primary action-btn builder-add-btn"
+                            id="openCreateQuestionModal"
+                            aria-label="Crea domanda"
+                            title="Crea domanda"
+                            {% if not selected_test %}disabled{% endif %}
+                        >
+                            <span aria-hidden="true">+</span>
+                        </button>
+                    </div>
                     {% if selected_test %}
                         <p class="small mb-2"><strong>Test:</strong> {{ selected_test.title }}</p>
-                        <div class="list-group mt-2 mb-4">
+                        <div class="list-group mt-2 mb-4" id="questionSortableList">
                             {% for question in questions %}
-                                <a href="?test={{ selected_test.id }}&question={{ question.id }}" class="list-group-item list-group-item-action {% if selected_question and selected_question.id == question.id %}active{% endif %}">
+                                <button
+                                    type="button"
+                                    class="list-group-item list-group-item-action text-start sortable-item {% if selected_question and selected_question.id == question.id %}active{% endif %}"
+                                    data-question-id="{{ question.id }}"
+                                    data-question-text="{{ question.text|escapejs }}"
+                                    data-question-order="{{ question.order }}"
+                                    data-sort-id="{{ question.id }}"
+                                >
                                     {{ question.order }}. {{ question.text }}
-                                </a>
+                                </button>
                             {% empty %}
                                 <div class="list-group-item">Nessuna domanda per questo test.</div>
                             {% endfor %}
                         </div>
-
-                        {% if question_create_form %}
-                            <h4 class="h6">Aggiungi domanda</h4>
-                            <form method="post" class="mb-4">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="create_question">
-
-                                <label class="form-label mt-2">Testo domanda</label>
-                                {{ question_create_form.text }}
-                                <div class="text-danger small">{{ question_create_form.text.errors|striptags }}</div>
-
-                                <label class="form-label mt-2">Ordine</label>
-                                {{ question_create_form.order }}
-                                <div class="text-danger small">{{ question_create_form.order.errors|striptags }}</div>
-
-                                <button type="submit" class="btn btn-primary action-btn mt-3 w-100">Crea domanda</button>
-                            </form>
-                        {% endif %}
-
-                        {% if selected_question and question_edit_form %}
-                            <h4 class="h6">Modifica domanda selezionata</h4>
-                            <form method="post" class="mb-2">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="update_question">
-
-                                <label class="form-label mt-2">Testo domanda</label>
-                                {{ question_edit_form.text }}
-                                <div class="text-danger small">{{ question_edit_form.text.errors|striptags }}</div>
-
-                                <label class="form-label mt-2">Ordine</label>
-                                {{ question_edit_form.order }}
-                                <div class="text-danger small">{{ question_edit_form.order.errors|striptags }}</div>
-
-                                <button type="submit" class="btn btn-outline-secondary mt-3 w-100">Salva modifica domanda</button>
-                            </form>
-                            <form method="post" onsubmit="return confirm('Eliminare questa domanda e le risposte collegate?');">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="delete_question">
-                                <button type="submit" class="btn btn-danger w-100">Elimina domanda</button>
-                            </form>
-                        {% endif %}
+                        <form method="post" id="reorderQuestionsForm" class="d-none">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="reorder_questions">
+                            <input type="hidden" name="ordered_question_ids" id="orderedQuestionIdsInput">
+                        </form>
                     {% else %}
                         <p class="mt-3">Seleziona prima un test per vedere e gestire le domande.</p>
                     {% endif %}
@@ -138,13 +123,13 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="insight-card h-100">
+                <div class="insight-card builder-column-card">
                     <h3 class="h5">Risposte e punteggio</h3>
                     {% if selected_question %}
                         <p class="small mb-2"><strong>Domanda:</strong> {{ selected_question.text }}</p>
-                        <div class="list-group mt-2 mb-4">
+                        <div class="list-group mt-2 mb-4" id="answerSortableList">
                             {% for answer in answers %}
-                                <a href="?test={{ selected_test.id }}&question={{ selected_question.id }}&answer={{ answer.id }}" class="list-group-item list-group-item-action {% if selected_answer and selected_answer.id == answer.id %}active{% endif %}">
+                                <a href="?test={{ selected_test.id }}&question={{ selected_question.id }}&answer={{ answer.id }}" class="list-group-item list-group-item-action sortable-item {% if selected_answer and selected_answer.id == answer.id %}active{% endif %}" data-sort-id="{{ answer.id }}">
                                     {{ answer.order }}. {{ answer.text }}
                                     <span class="d-block small">Punti: {{ answer.points }}</span>
                                 </a>
@@ -167,11 +152,9 @@
                                 {{ answer_create_form.points }}
                                 <div class="text-danger small">{{ answer_create_form.points.errors|striptags }}</div>
 
-                                <label class="form-label mt-2">Ordine</label>
-                                {{ answer_create_form.order }}
-                                <div class="text-danger small">{{ answer_create_form.order.errors|striptags }}</div>
-
-                                <button type="submit" class="btn btn-primary action-btn mt-3 w-100">Crea risposta</button>
+                                <button type="submit" class="btn btn-primary action-btn mt-3 builder-add-btn" aria-label="Crea risposta" title="Crea risposta">
+                                    <span aria-hidden="true">+</span>
+                                </button>
                             </form>
                         {% endif %}
 
@@ -189,10 +172,6 @@
                                 {{ answer_edit_form.points }}
                                 <div class="text-danger small">{{ answer_edit_form.points.errors|striptags }}</div>
 
-                                <label class="form-label mt-2">Ordine</label>
-                                {{ answer_edit_form.order }}
-                                <div class="text-danger small">{{ answer_edit_form.order.errors|striptags }}</div>
-
                                 <button type="submit" class="btn btn-outline-secondary mt-3 w-100">Salva modifica risposta</button>
                             </form>
                             <form method="post" onsubmit="return confirm('Eliminare questa risposta?');">
@@ -201,6 +180,11 @@
                                 <button type="submit" class="btn btn-danger w-100">Elimina risposta</button>
                             </form>
                         {% endif %}
+                        <form method="post" id="reorderAnswersForm" class="d-none">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="reorder_answers">
+                            <input type="hidden" name="ordered_answer_ids" id="orderedAnswerIdsInput">
+                        </form>
                     {% else %}
                         <p class="mt-3">Seleziona prima una domanda per vedere e gestire le risposte.</p>
                     {% endif %}
@@ -209,4 +193,350 @@
         </div>
     </div>
 </section>
+
+<div class="modal fade" id="testModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="testModalTitle">Crea test</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" id="testModalForm">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" id="testModalAction" value="create_test">
+
+                    <label class="form-label">Titolo</label>
+                    <input type="text" class="form-control" id="testModalTitleInput" required>
+
+                    <label class="form-label mt-3">Descrizione</label>
+                    <textarea class="form-control" id="testModalDescriptionInput" rows="3"></textarea>
+
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" id="testModalActiveInput">
+                        <label class="form-check-label" for="testModalActiveInput">Test attivo</label>
+                    </div>
+
+                    <div id="testDeleteConfirm" class="alert alert-danger mt-3 d-none" role="alert">
+                        Sei sicuro di eliminare definitivamente questo test? Verranno eliminate anche domande e risposte collegate.
+                        <div class="d-flex gap-2 mt-2">
+                            <button type="button" class="btn btn-danger btn-sm" id="confirmDeleteTestBtn">Sì, elimina</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="cancelDeleteTestBtn">Annulla</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer d-block">
+                    <div class="d-flex gap-2 w-100">
+                        <a href="#" class="btn btn-primary d-none flex-fill" id="viewQuestionsBtn">Visualizza domande</a>
+                        <button type="submit" class="btn btn-outline-secondary flex-fill" id="saveTestBtn">Salva modifiche</button>
+                    </div>
+                    <button type="button" class="btn btn-danger d-none w-100 mt-2" id="requestDeleteTestBtn">Elimina test</button>
+                </div>
+            </form>
+
+            <form method="post" id="deleteTestForm" class="d-none">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete_test">
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="questionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="questionModalTitle">Crea domanda</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" id="questionModalForm">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" id="questionModalAction" value="create_question">
+
+                    <label class="form-label">Testo domanda</label>
+                    <input type="text" class="form-control" id="questionModalTextInput" required>
+
+                    <div id="questionDeleteConfirm" class="alert alert-danger mt-3 d-none" role="alert">
+                        Sei sicuro di eliminare definitivamente questa domanda? Verranno eliminate anche le risposte collegate.
+                        <div class="d-flex gap-2 mt-2">
+                            <button type="button" class="btn btn-danger btn-sm" id="confirmDeleteQuestionBtn">Sì, elimina</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="cancelDeleteQuestionBtn">Annulla</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer d-block">
+                    <div class="d-flex gap-2 w-100">
+                        <a href="#" class="btn btn-primary d-none flex-fill" id="viewAnswersBtn">Visualizza risposte</a>
+                        <button type="submit" class="btn btn-outline-secondary flex-fill" id="saveQuestionBtn">Salva modifiche</button>
+                    </div>
+                    <button type="button" class="btn btn-danger d-none w-100 mt-2" id="requestDeleteQuestionBtn">Elimina domanda</button>
+                </div>
+            </form>
+
+            <form method="post" id="deleteQuestionForm" class="d-none">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete_question">
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script>
+    window.addEventListener('load', function () {
+        const modalElement = document.getElementById('testModal');
+        if (!modalElement || !window.bootstrap) {
+            return;
+        }
+
+        const modal = new bootstrap.Modal(modalElement);
+        const openCreateBtn = document.getElementById('openCreateTestModal');
+        const testButtons = document.querySelectorAll('[data-test-id]');
+
+        const form = document.getElementById('testModalForm');
+        const deleteForm = document.getElementById('deleteTestForm');
+
+        const modalTitle = document.getElementById('testModalTitle');
+        const modalAction = document.getElementById('testModalAction');
+        const titleInput = document.getElementById('testModalTitleInput');
+        const descriptionInput = document.getElementById('testModalDescriptionInput');
+        const activeInput = document.getElementById('testModalActiveInput');
+
+        const saveBtn = document.getElementById('saveTestBtn');
+        const viewQuestionsBtn = document.getElementById('viewQuestionsBtn');
+        const requestDeleteBtn = document.getElementById('requestDeleteTestBtn');
+        const deleteConfirm = document.getElementById('testDeleteConfirm');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteTestBtn');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteTestBtn');
+
+        let currentTestId = null;
+
+        function resetDeleteConfirm() {
+            deleteConfirm.classList.add('d-none');
+        }
+
+        function configureCreateMode() {
+            currentTestId = null;
+            modalTitle.textContent = 'Crea test';
+            modalAction.value = 'create_test';
+
+            titleInput.name = 'test_create-title';
+            descriptionInput.name = 'test_create-description';
+            activeInput.name = 'test_create-is_active';
+
+            titleInput.value = '';
+            descriptionInput.value = '';
+            activeInput.checked = true;
+
+            form.action = '{% url "assessments:admin-test-builder" %}';
+            saveBtn.textContent = 'Crea test';
+
+            viewQuestionsBtn.classList.add('d-none');
+            requestDeleteBtn.classList.add('d-none');
+            resetDeleteConfirm();
+        }
+
+        function configureEditMode(testId, title, description, isActive) {
+            currentTestId = testId;
+            modalTitle.textContent = 'Modifica test';
+            modalAction.value = 'update_test';
+
+            titleInput.name = 'test_edit-title';
+            descriptionInput.name = 'test_edit-description';
+            activeInput.name = 'test_edit-is_active';
+
+            titleInput.value = title;
+            descriptionInput.value = description;
+            activeInput.checked = isActive;
+
+            form.action = `{% url "assessments:admin-test-builder" %}?test=${testId}`;
+            saveBtn.textContent = 'Salva modifiche';
+
+            viewQuestionsBtn.href = `{% url "assessments:admin-test-builder" %}?test=${testId}`;
+            viewQuestionsBtn.classList.remove('d-none');
+            requestDeleteBtn.classList.remove('d-none');
+            resetDeleteConfirm();
+        }
+
+        openCreateBtn.addEventListener('click', function () {
+            configureCreateMode();
+            modal.show();
+        });
+
+        testButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                configureEditMode(
+                    button.dataset.testId,
+                    button.dataset.testTitle || '',
+                    button.dataset.testDescription || '',
+                    button.dataset.testActive === '1'
+                );
+                modal.show();
+            });
+        });
+
+        requestDeleteBtn.addEventListener('click', function () {
+            deleteConfirm.classList.remove('d-none');
+        });
+
+        cancelDeleteBtn.addEventListener('click', function () {
+            resetDeleteConfirm();
+        });
+
+        confirmDeleteBtn.addEventListener('click', function () {
+            if (!currentTestId) return;
+            deleteForm.action = `{% url "assessments:admin-test-builder" %}?test=${currentTestId}`;
+            deleteForm.submit();
+        });
+
+        const questionModalElement = document.getElementById('questionModal');
+        const openCreateQuestionBtn = document.getElementById('openCreateQuestionModal');
+        const questionButtons = document.querySelectorAll('[data-question-id]');
+
+        if (!questionModalElement || !openCreateQuestionBtn) {
+            return;
+        }
+
+        const questionModal = new bootstrap.Modal(questionModalElement);
+        const questionForm = document.getElementById('questionModalForm');
+        const deleteQuestionForm = document.getElementById('deleteQuestionForm');
+
+        const questionModalTitle = document.getElementById('questionModalTitle');
+        const questionModalAction = document.getElementById('questionModalAction');
+        const questionTextInput = document.getElementById('questionModalTextInput');
+
+        const saveQuestionBtn = document.getElementById('saveQuestionBtn');
+        const viewAnswersBtn = document.getElementById('viewAnswersBtn');
+        const requestDeleteQuestionBtn = document.getElementById('requestDeleteQuestionBtn');
+        const questionDeleteConfirm = document.getElementById('questionDeleteConfirm');
+        const confirmDeleteQuestionBtn = document.getElementById('confirmDeleteQuestionBtn');
+        const cancelDeleteQuestionBtn = document.getElementById('cancelDeleteQuestionBtn');
+
+        const selectedTestId = "{{ selected_test.id|default:'' }}";
+        let currentQuestionId = null;
+
+        function resetQuestionDeleteConfirm() {
+            questionDeleteConfirm.classList.add('d-none');
+        }
+
+        function configureQuestionCreateMode() {
+            currentQuestionId = null;
+            questionModalTitle.textContent = 'Crea domanda';
+            questionModalAction.value = 'create_question';
+
+            questionTextInput.name = 'question_create-text';
+
+            questionTextInput.value = '';
+
+            questionForm.action = `{% url "assessments:admin-test-builder" %}?test=${selectedTestId}`;
+            saveQuestionBtn.textContent = 'Crea domanda';
+
+            viewAnswersBtn.classList.add('d-none');
+            requestDeleteQuestionBtn.classList.add('d-none');
+            resetQuestionDeleteConfirm();
+        }
+
+        function configureQuestionEditMode(questionId, questionText, questionOrder) {
+            currentQuestionId = questionId;
+            questionModalTitle.textContent = 'Modifica domanda';
+            questionModalAction.value = 'update_question';
+
+            questionTextInput.name = 'question_edit-text';
+
+            questionTextInput.value = questionText;
+
+            questionForm.action = `{% url "assessments:admin-test-builder" %}?test=${selectedTestId}&question=${questionId}`;
+            saveQuestionBtn.textContent = 'Salva modifiche';
+
+            viewAnswersBtn.href = `{% url "assessments:admin-test-builder" %}?test=${selectedTestId}&question=${questionId}`;
+            viewAnswersBtn.classList.remove('d-none');
+            requestDeleteQuestionBtn.classList.remove('d-none');
+            resetQuestionDeleteConfirm();
+        }
+
+        openCreateQuestionBtn.addEventListener('click', function () {
+            if (!selectedTestId) {
+                return;
+            }
+            configureQuestionCreateMode();
+            questionModal.show();
+        });
+
+        questionButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                configureQuestionEditMode(
+                    button.dataset.questionId,
+                    button.dataset.questionText || '',
+                    button.dataset.questionOrder || '1'
+                );
+                questionModal.show();
+            });
+        });
+
+        requestDeleteQuestionBtn.addEventListener('click', function () {
+            questionDeleteConfirm.classList.remove('d-none');
+        });
+
+        cancelDeleteQuestionBtn.addEventListener('click', function () {
+            resetQuestionDeleteConfirm();
+        });
+
+        confirmDeleteQuestionBtn.addEventListener('click', function () {
+            if (!selectedTestId || !currentQuestionId) {
+                return;
+            }
+            deleteQuestionForm.action = `{% url "assessments:admin-test-builder" %}?test=${selectedTestId}&question=${currentQuestionId}`;
+            deleteQuestionForm.submit();
+        });
+
+        if (window.Sortable) {
+            const questionSortableList = document.getElementById('questionSortableList');
+            const reorderQuestionsForm = document.getElementById('reorderQuestionsForm');
+            const orderedQuestionIdsInput = document.getElementById('orderedQuestionIdsInput');
+
+            if (questionSortableList && reorderQuestionsForm && orderedQuestionIdsInput && selectedTestId) {
+                new Sortable(questionSortableList, {
+                    animation: 150,
+                    onEnd: function () {
+                        const orderedIds = Array.from(questionSortableList.querySelectorAll('[data-sort-id]'))
+                            .map((item) => item.dataset.sortId)
+                            .filter(Boolean);
+                        if (!orderedIds.length) {
+                            return;
+                        }
+                        orderedQuestionIdsInput.value = orderedIds.join(',');
+                        reorderQuestionsForm.action = `{% url "assessments:admin-test-builder" %}?test=${selectedTestId}`;
+                        reorderQuestionsForm.submit();
+                    }
+                });
+            }
+
+            const answerSortableList = document.getElementById('answerSortableList');
+            const reorderAnswersForm = document.getElementById('reorderAnswersForm');
+            const orderedAnswerIdsInput = document.getElementById('orderedAnswerIdsInput');
+            const selectedQuestionId = "{{ selected_question.id|default:'' }}";
+
+            if (answerSortableList && reorderAnswersForm && orderedAnswerIdsInput && selectedTestId && selectedQuestionId) {
+                new Sortable(answerSortableList, {
+                    animation: 150,
+                    onEnd: function () {
+                        const orderedIds = Array.from(answerSortableList.querySelectorAll('[data-sort-id]'))
+                            .map((item) => item.dataset.sortId)
+                            .filter(Boolean);
+                        if (!orderedIds.length) {
+                            return;
+                        }
+                        orderedAnswerIdsInput.value = orderedIds.join(',');
+                        reorderAnswersForm.action = `{% url "assessments:admin-test-builder" %}?test=${selectedTestId}&question=${selectedQuestionId}`;
+                        reorderAnswersForm.submit();
+                    }
+                });
+            }
+        }
+    });
+</script>
 {% endblock %}
