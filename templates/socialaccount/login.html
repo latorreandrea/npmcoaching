@@ -8,6 +8,11 @@
             <div class="col-lg-6 col-md-8">
                 <div class="insight-card auth-card text-center">
                     <p class="section-kicker">Account</p>
+                    <div class="auth-social-grid auth-social-grid-spaced" aria-label="Provider social selezionato">
+                        <span class="btn btn-outline-secondary auth-social-btn auth-social-btn-icon" role="img" aria-label="{{ provider.name }}">
+                            <i class="bi {% if provider.id == 'google' %}bi-google{% elif provider.id == 'facebook' %}bi-facebook{% elif provider.id == 'linkedin_oauth2' or provider.id == 'linkedin' %}bi-linkedin{% elif provider.id == 'github' %}bi-github{% elif provider.id == 'apple' %}bi-apple{% elif provider.id == 'microsoft' %}bi-microsoft{% else %}bi-person-circle{% endif %}" aria-hidden="true"></i>
+                        </span>
+                    </div>
                     {% if process == "connect" %}
                         <h1 class="section-title auth-title">Collega {{ provider.name }}</h1>
                         <p class="section-description auth-subtitle">Stai per collegare il tuo account {{ provider.name }} al profilo esistente.</p>

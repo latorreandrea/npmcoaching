@@ -37,12 +37,16 @@
 
                     <div class="auth-divider"><span>oppure continua con</span></div>
 
-                    <div class="d-grid gap-2 auth-social-grid">
-                        <a class="btn btn-outline-secondary auth-social-btn" href="{% provider_login_url 'google' process='login' %}">Google</a>
-                        <!-- <a class="btn btn-outline-secondary auth-social-btn" href="#">LinkedIn</a>
-                        <a class="btn btn-outline-secondary auth-social-btn" href="#">Facebook</a>
-                        <a class="btn btn-outline-secondary auth-social-btn" href="#">Instagram</a> -->
-                    </div>
+                    {% get_providers as socialaccount_providers %}
+                    {% if socialaccount_providers %}
+                        <div class="auth-social-grid auth-social-grid-spaced" aria-label="Accesso con social account">
+                            {% for provider in socialaccount_providers %}
+                                <a class="btn btn-outline-secondary auth-social-btn auth-social-btn-icon" href="{% provider_login_url provider.id process='login' %}" aria-label="Accedi con {{ provider.name }}" title="Accedi con {{ provider.name }}">
+                                    <i class="bi {% if provider.id == 'google' %}bi-google{% elif provider.id == 'facebook' %}bi-facebook{% elif provider.id == 'linkedin_oauth2' or provider.id == 'linkedin' %}bi-linkedin{% elif provider.id == 'github' %}bi-github{% elif provider.id == 'apple' %}bi-apple{% elif provider.id == 'microsoft' %}bi-microsoft{% else %}bi-person-circle{% endif %}" aria-hidden="true"></i>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
 
                     <p class="mt-4 mb-0 text-center auth-link-row">
                         Non hai un account? <a href="{% url 'account_signup' %}">Registrati</a>
