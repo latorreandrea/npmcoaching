@@ -763,4 +763,18 @@ Notes:
 - In local development, keep `DJANGO_USE_GCS_MEDIA=False` (default) to use local media files.
 - Ensure the Cloud Run service account has permission to write/read objects in the target bucket.
 
+### Deployment reminder (Guest Assessments + GDPR)
+
+Before go-live, complete this checklist:
+
+- Configure a scheduler (cron/Cloud Scheduler/Heroku Scheduler) to run:
+  - `python manage.py cleanup_guest_test_results`
+- Confirm retention env vars in production:
+  - `ASSESSMENTS_GUEST_RESULT_RETENTION_DAYS`
+  - `ASSESSMENTS_GUEST_CONSENT_POLICY_VERSION`
+- Verify legal pages are aligned with final legal copy (privacy/cookie + guest retention and consent wording).
+- Validate operational GDPR flow:
+  - data export/deletion request handling
+  - support procedure for consent audit logs
+
 ## Credits

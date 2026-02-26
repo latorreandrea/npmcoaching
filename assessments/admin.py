@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Answer, PersonalityProfile, Question, Test, TestResult
+from .models import Answer, GuestConsentLog, PersonalityProfile, Question, Test, TestResult
 
 
 class QuestionInline(admin.TabularInline):
@@ -50,7 +50,15 @@ class PersonalityProfileAdmin(admin.ModelAdmin):
 
 @admin.register(TestResult)
 class TestResultAdmin(admin.ModelAdmin):
-    list_display = ("user", "test", "score", "personality", "created_at")
-    list_filter = ("test", "personality")
+    list_display = ("user", "is_guest", "test", "score", "personality", "expires_at", "created_at")
+    list_filter = ("is_guest", "test", "personality")
     search_fields = ("user__email", "test__title")
     readonly_fields = ("created_at",)
+
+
+@admin.register(GuestConsentLog)
+class GuestConsentLogAdmin(admin.ModelAdmin):
+    list_display = ("test", "policy_version", "accepted_at")
+    list_filter = ("test", "policy_version")
+    search_fields = ("test__title", "session_key")
+    readonly_fields = ("test", "session_key", "policy_version", "accepted_at")

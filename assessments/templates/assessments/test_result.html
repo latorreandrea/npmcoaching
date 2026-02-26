@@ -20,6 +20,16 @@
                         <p>Non è stato trovato un profilo di personalità per questo punteggio. Verifica i range in area admin.</p>
                     {% endif %}
 
+                    {% if is_guest_result %}
+                        <div class="alert alert-info mt-3" role="alert">
+                            Risultato temporaneo in modalità ospite. Per privacy e sicurezza viene conservato per un periodo limitato.
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            <a href="{% url 'account_signup' %}?next={{ request.path|urlencode }}" class="btn btn-primary action-btn">Crea account e salva risultato</a>
+                            <a href="{% url 'account_login' %}?next={{ request.path|urlencode }}" class="btn btn-outline-secondary">Hai già un account? Accedi</a>
+                        </div>
+                    {% endif %}
+
                     <a href="{% url 'assessments:tests-list' %}" class="btn btn-primary action-btn mt-2">Torna ai test</a>
                 </div>
             </div>

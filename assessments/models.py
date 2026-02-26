@@ -67,9 +67,18 @@ class PersonalityProfile(models.Model):
 
 
 class TestResult(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="test_results", on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="test_results",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
     test = models.ForeignKey(Test, related_name="results", on_delete=models.CASCADE)
     score = models.IntegerField()
+    session_key = models.CharField(max_length=64, blank=True, default="", db_index=True)
+    is_guest = models.BooleanField(default=False, db_index=True)
+    expires_at = models.DateTimeField(null=True, blank=True, db_index=True)
     personality = models.ForeignKey(
         PersonalityProfile,
         related_name="results",
@@ -85,3 +94,17 @@ class TestResult(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.test.title} ({self.score})"
+
+
+class GuestConsentLog(models.Model):
+    test = models.ForeignKey(Test, related_name="guest_consents", on_delete=models.CASCADE)
+    session_key = models.CharField(max_length=64, db_index=True)
+    policy_version = models.CharField(max_length=20)
+    accepted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-accepted_at"]
+        db_table = "assessments_guestconsentlog"
+
+    def __str__(self):
+        return f"Consent {self.policy_version} - {self.test.title}"

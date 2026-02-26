@@ -1,22 +1,33 @@
 from urllib.parse import urlencode
+from datetime import timedelta
+from time import time
 
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Max
+from django.conf import settings
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 
-from .models import Answer, Question, Test, TestResult
+from .models import Answer, GuestConsentLog, Question, Test, TestResult
+from .signals import claim_guest_results_for_user
+from .utils import session_fingerprint
 
 from .forms import AnswerForm, QuestionForm, TestForm
 
 
-@login_required
 def test_list(request):
     tests = Test.objects.filter(is_active=True).order_by("title")
-    return render(request, "assessments/tests_list.html", {"tests": tests})
+    return render(
+        request,
+        "assessments/tests_list.html",
+        {
+            "tests": tests,
+            "is_guest": not request.user.is_authenticated,
+        },
+    )
 
 
-@login_required
 def take_test(request, test_id):
     test = get_object_or_404(Test, id=test_id, is_active=True)
     questions = test.questions.prefetch_related("answers").all()
@@ -24,6 +35,19 @@ def take_test(request, test_id):
     if request.method == "POST":
         total_score = 0
         missing_questions = []
+        is_guest = not request.user.is_authenticated
+
+        if is_guest and request.POST.get("guest_consent") != "on":
+            return render(
+                request,
+                "assessments/take_test.html",
+                {
+                    "test": test,
+                    "questions": questions,
+                    "error_message": "Per continuare come ospite devi accettare Privacy e Cookie Policy.",
+                    "is_guest": True,
+                },
+            )
 
         for question in questions:
             answer_id = request.POST.get(f"question_{question.id}")
@@ -46,22 +70,105 @@ def take_test(request, test_id):
                 },
             )
 
+        if is_guest and _is_guest_rate_limited(request):
+            return render(
+                request,
+                "assessments/take_test.html",
+                {
+                    "test": test,
+                    "questions": questions,
+                    "error_message": "Hai effettuato troppi invii in poco tempo. Riprova tra un minuto.",
+                    "is_guest": True,
+                },
+            )
+
         personality = test.get_personality_for_score(total_score)
-        result = TestResult.objects.create(
-            user=request.user,
-            test=test,
-            score=total_score,
-            personality=personality,
-        )
+
+        if request.user.is_authenticated:
+            result = TestResult.objects.create(
+                user=request.user,
+                test=test,
+                score=total_score,
+                personality=personality,
+            )
+        else:
+            guest_fingerprint = session_fingerprint(_ensure_session_key(request))
+            GuestConsentLog.objects.create(
+                test=test,
+                session_key=guest_fingerprint,
+                policy_version=getattr(settings, "ASSESSMENTS_GUEST_CONSENT_POLICY_VERSION", "2026-02"),
+            )
+            result = TestResult.objects.create(
+                user=None,
+                test=test,
+                score=total_score,
+                personality=personality,
+                session_key=guest_fingerprint,
+                is_guest=True,
+                expires_at=timezone.now() + timedelta(days=getattr(settings, "ASSESSMENTS_GUEST_RESULT_RETENTION_DAYS", 14)),
+            )
+            request.session["assessments_guest_fingerprint"] = guest_fingerprint
         return redirect("assessments:test-result", result_id=result.id)
 
-    return render(request, "assessments/take_test.html", {"test": test, "questions": questions})
+    return render(
+        request,
+        "assessments/take_test.html",
+        {
+            "test": test,
+            "questions": questions,
+            "is_guest": not request.user.is_authenticated,
+        },
+    )
 
 
-@login_required
 def test_result(request, result_id):
-    result = get_object_or_404(TestResult, id=result_id, user=request.user)
-    return render(request, "assessments/test_result.html", {"result": result})
+    result = get_object_or_404(TestResult, id=result_id)
+
+    if result.user_id:
+        if not request.user.is_authenticated or result.user_id != request.user.id:
+            login_url = f"{reverse('account_login')}?{urlencode({'next': request.path})}"
+            return redirect(login_url)
+    else:
+        session_key = _ensure_session_key(request)
+        guest_fingerprint = session_fingerprint(session_key)
+        is_expired = result.expires_at and result.expires_at < timezone.now()
+        if not result.is_guest or result.session_key != guest_fingerprint or is_expired:
+            return redirect("assessments:tests-list")
+
+        if request.user.is_authenticated:
+            claim_guest_results_for_user(user=request.user, session_key=session_key)
+            result.refresh_from_db()
+
+    return render(
+        request,
+        "assessments/test_result.html",
+        {
+            "result": result,
+            "is_guest_result": not request.user.is_authenticated and result.is_guest,
+        },
+    )
+
+
+def _ensure_session_key(request):
+    if not request.session.session_key:
+        request.session.save()
+    return request.session.session_key
+
+
+def _is_guest_rate_limited(request):
+    limit = getattr(settings, "ASSESSMENTS_GUEST_RATE_LIMIT_COUNT", 5)
+    window_seconds = getattr(settings, "ASSESSMENTS_GUEST_RATE_LIMIT_WINDOW_SECONDS", 60)
+    now_ts = int(time())
+
+    session_key = "assessments_guest_submit_timestamps"
+    recent = [ts for ts in request.session.get(session_key, []) if now_ts - ts < window_seconds]
+    if len(recent) >= limit:
+        request.session[session_key] = recent
+        return True
+
+    recent.append(now_ts)
+    request.session[session_key] = recent
+    return False
 
 
 def _safe_int(value):

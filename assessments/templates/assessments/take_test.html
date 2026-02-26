@@ -41,6 +41,21 @@
                         </div>
                     {% endfor %}
 
+                    {% if questions and is_guest %}
+                        <div class="insight-card mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="guest_consent" id="guest_consent" required>
+                                <label class="form-check-label" for="guest_consent">
+                                    Confermo di aver letto e accettato la
+                                    <a href="{% url 'privacy-policy' %}" target="_blank" rel="noopener">Privacy Policy</a>
+                                    e la
+                                    <a href="{% url 'cookie-policy' %}" target="_blank" rel="noopener">Cookie Policy</a>
+                                    per eseguire il test come ospite.
+                                </label>
+                            </div>
+                        </div>
+                    {% endif %}
+
                     {% if questions %}
                         <button type="submit" class="btn btn-primary action-btn">Invia test</button>
                     {% endif %}
