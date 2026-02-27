@@ -280,4 +280,86 @@ document.addEventListener('DOMContentLoaded', () => {
             ticking = true;
         }
     }, { passive: true });
+
+    const methodStepsContainer = document.querySelector('.method-steps');
+    const methodSteps = Array.from(document.querySelectorAll('.method-steps .method-step'));
+    let methodStepsTicking = false;
+
+    const updateMethodStepsProgress = () => {
+        if (!methodStepsContainer || !methodSteps.length) {
+            return;
+        }
+
+        const stepIndices = methodSteps
+            .map((step) => step.querySelector('.method-step-index'))
+            .filter(Boolean);
+
+        if (!stepIndices.length) {
+            return;
+        }
+
+        const containerRect = methodStepsContainer.getBoundingClientRect();
+        const firstIndexRect = stepIndices[0].getBoundingClientRect();
+        const lastIndexRect = stepIndices[stepIndices.length - 1].getBoundingClientRect();
+
+        const firstCenter = (firstIndexRect.top - containerRect.top) + (firstIndexRect.height / 2);
+        const lastCenter = (lastIndexRect.top - containerRect.top) + (lastIndexRect.height / 2);
+        const lineHeight = Math.max(lastCenter - firstCenter, 0);
+
+        methodStepsContainer.style.setProperty('--method-line-top', `${firstCenter}px`);
+        methodStepsContainer.style.setProperty('--method-line-height', `${lineHeight}px`);
+
+        const viewportHeight = window.innerHeight;
+        const bandTop = viewportHeight * 0.38;
+        const bandBottom = viewportHeight * 0.62;
+        const bandCenter = (bandTop + bandBottom) / 2;
+
+        let activeIndex = -1;
+        let minDistance = Number.POSITIVE_INFINITY;
+
+        methodSteps.forEach((step, index) => {
+            const rect = step.getBoundingClientRect();
+            const intersectsBand = rect.bottom >= bandTop && rect.top <= bandBottom;
+            if (!intersectsBand) {
+                return;
+            }
+
+            const midpoint = rect.top + (rect.height / 2);
+            const distance = Math.abs(midpoint - bandCenter);
+            if (distance < minDistance) {
+                minDistance = distance;
+                activeIndex = index;
+            }
+        });
+
+        methodSteps.forEach((step, index) => {
+            step.classList.toggle('is-active', activeIndex >= 0 && index <= activeIndex);
+        });
+
+        if (activeIndex < 0) {
+            methodStepsContainer.style.setProperty('--method-progress-height', '0px');
+            return;
+        }
+
+        const activeIndexRect = stepIndices[activeIndex].getBoundingClientRect();
+        const activeCenter = (activeIndexRect.top - containerRect.top) + (activeIndexRect.height / 2);
+        const progressHeight = Math.min(Math.max(activeCenter - firstCenter, 0), lineHeight);
+        methodStepsContainer.style.setProperty('--method-progress-height', `${progressHeight}px`);
+    };
+
+    if (methodStepsContainer && methodSteps.length) {
+        updateMethodStepsProgress();
+
+        window.addEventListener('scroll', () => {
+            if (!methodStepsTicking) {
+                window.requestAnimationFrame(() => {
+                    updateMethodStepsProgress();
+                    methodStepsTicking = false;
+                });
+                methodStepsTicking = true;
+            }
+        }, { passive: true });
+
+        window.addEventListener('resize', updateMethodStepsProgress);
+    }
 });

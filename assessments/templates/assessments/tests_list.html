@@ -7,12 +7,8 @@
             <div class="col-lg-8">
                 <p class="section-kicker">Test</p>
                 <h1 class="section-title">I tuoi test di personalità</h1>
-                {% if is_guest %}
-                    <p class="section-description">Puoi iniziare subito senza account. Al termine puoi registrarti per salvare lo storico dei risultati.</p>
-                {% else %}
+               
                     <p class="section-description">Scegli un test e monitora i tuoi progressi nel tempo.</p>
-                {% endif %}
-
                 {% if tests %}
                     <div class="mt-4 d-grid gap-3">
                         {% for test in tests %}

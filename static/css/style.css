@@ -10,6 +10,12 @@
     --text: #1f2937;
 }
 
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 /* ========================================
     2) Base Layout
 ======================================== */
@@ -19,6 +25,21 @@ body.app-body {
     color: var(--text);
     text-rendering: optimizeLegibility;
     overflow-x: hidden;
+}
+
+html,
+body {
+    max-width: 100%;
+    overflow-x: clip;
+}
+
+img,
+svg,
+video,
+canvas,
+iframe {
+    max-width: 100%;
+    height: auto;
 }
 
 /* ========================================
@@ -294,6 +315,128 @@ section[id] {
 .testimonial-card p {
     margin: 0;
     color: #4b5563;
+}
+
+.method-card,
+.insight-card,
+.testimonial-card,
+.auth-card,
+.cookie-consent-card,
+.method-step-card {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.method-steps {
+    position: relative;
+    display: grid;
+    gap: 1.05rem;
+    --method-line-top: 0px;
+    --method-line-height: 0px;
+    --method-progress-height: 0px;
+    --method-index-size: 2.85rem;
+}
+
+.method-steps::before,
+.method-steps::after {
+    content: '';
+    position: absolute;
+    left: calc(var(--method-index-size) / 2);
+    width: 3px;
+    border-radius: 999px;
+    transform: translateX(-50%);
+}
+
+.method-steps::before {
+    top: var(--method-line-top);
+    height: var(--method-line-height);
+    background: rgba(31, 41, 55, 0.14);
+}
+
+.method-steps::after {
+    top: var(--method-line-top);
+    height: var(--method-progress-height);
+    background: var(--secondary);
+    transition: height 0.35s ease;
+}
+
+.method-step {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 2.85rem 1fr;
+    gap: 1rem;
+    align-items: center;
+}
+
+.method-step-index {
+    width: var(--method-index-size);
+    height: var(--method-index-size);
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 1px solid rgba(31, 41, 55, 0.14);
+    color: #1f2937;
+    font-weight: 600;
+    font-size: 1.35rem;
+    transition: all 0.3s ease;
+}
+
+.method-step-card {
+    position: relative;
+    background: #fff;
+    border: 1px solid rgba(31, 41, 55, 0.08);
+    border-radius: 1rem;
+    padding: 1.3rem 1.35rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+}
+
+.method-step-card::before {
+    content: '';
+    position: absolute;
+    left: -0.48rem;
+    top: 50%;
+    width: 0.95rem;
+    height: 0.95rem;
+    transform: translateY(-50%) rotate(45deg);
+    background: inherit;
+    border-left: inherit;
+    border-bottom: inherit;
+}
+
+.method-step-card h3 {
+    font-size: 1.75rem;
+    margin-bottom: 0.45rem;
+}
+
+.method-step-card p {
+    color: #4b5563;
+    transition: color 0.3s ease;
+}
+
+.method-step:hover .method-step-card {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 36px rgba(31, 41, 55, 0.14);
+}
+
+.method-step.is-active .method-step-index {
+    background: var(--secondary);
+    border-color: var(--secondary);
+    color: #fff;
+}
+
+.method-step.is-active .method-step-card {
+    background: var(--secondary);
+    border-color: var(--secondary);
+    box-shadow: 0 18px 38px rgba(80, 144, 30, 0.28);
+}
+
+.method-step.is-active .method-step-card h3,
+.method-step.is-active .method-step-card p {
+    color: #fff;
 }
 
 .testimonial-card span {
@@ -746,12 +889,28 @@ html {
     .hero-scroll-indicator {
         animation: none !important;
     }
+
+    .method-steps::after,
+    .method-step .method-step-index,
+    .method-step .method-step-card {
+        animation: none !important;
+    }
 }
 
 /* ========================================
     16) Responsive: Tablet/Mobile
 ======================================== */
 @media (max-width: 991.98px) {
+    .container,
+    .container-fluid {
+        max-width: 100%;
+        overflow-x: clip;
+    }
+
+    .row > * {
+        min-width: 0;
+    }
+
     .site-main {
         padding-top: 78px;
     }
@@ -835,6 +994,41 @@ html {
     .cookie-setting-item {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .method-step-card h3 {
+        font-size: 1.45rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .section-title,
+    .section-description,
+    .method-step-card h3,
+    .method-step-card p {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .method-step {
+        grid-template-columns: 2.55rem 1fr;
+        gap: 0.8rem;
+    }
+
+    .method-steps {
+        --method-index-size: 2.55rem;
+    }
+
+    .method-step-index {
+        font-size: 1.2rem;
+    }
+
+    .method-step-card {
+        padding: 1.1rem 1rem;
+    }
+
+    .method-step-card h3 {
+        font-size: 1.25rem;
     }
 }
 

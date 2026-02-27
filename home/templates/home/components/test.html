@@ -3,21 +3,21 @@
         <div class="row justify-content-center">
             <div class="col-lg-8 text-center" data-aos="blur-up" data-aos-duration="900">
                 <p class="section-kicker">Assessment</p>
-                <h2 class="section-title">Inizia da una valutazione chiara della tua situazione attuale.</h2>
-                <p class="section-description mx-auto">Gli assessment ti aiutano a capire dove sei oggi e quali leve attivare per accelerare la tua crescita personale e professionale.</p>
+                <h2 class="section-title">Scopri in pochi minuti cosa sta davvero rallentando la tua crescita.</h2>
+                <p class="section-description mx-auto">Con i test ottieni una fotografia immediata del tuo profilo e indicazioni pratiche per fare il prossimo passo con più chiarezza.</p>
             </div>
         </div>
         <div class="row g-4 mt-2">
             <div class="col-md-6 col-lg-4" data-aos="soft-pop" data-aos-delay="80" data-aos-duration="800">
                 <article class="insight-card h-100">
                     <h3>Focus ed energia</h3>
-                    <p>Riconosci i tuoi pattern e migliora continuità, lucidità e qualità dell'azione.</p>
+                    <p>Identifica i tuoi pattern e aumenta continuità, lucidità e qualità dell'azione quotidiana.</p>
                 </article>
             </div>
             <div class="col-md-6 col-lg-4" data-aos="soft-pop" data-aos-delay="180" data-aos-duration="860">
                 <article class="insight-card h-100">
                     <h3>Decision making</h3>
-                    <p>Prendi decisioni più solide e allineate ai tuoi obiettivi nei momenti chiave.</p>
+                    <p>Prendi decisioni più solide e allineate ai tuoi obiettivi nei momenti davvero importanti.</p>
                 </article>
             </div>
             <div class="col-md-6 col-lg-4" data-aos="soft-pop" data-aos-delay="280" data-aos-duration="920">
@@ -25,6 +25,20 @@
                     <h3>Leadership Personale</h3>
                     <p>Sviluppa responsabilità, coerenza e visione per guidare i tuoi prossimi passi.</p>
                 </article>
+            </div>
+        </div>
+
+        <div class="row justify-content-center mt-4">
+            <div class="col-lg-8" data-aos="blur-up" data-aos-delay="140" data-aos-duration="900">
+                <div class="insight-card text-center">
+                    <h3 class="mb-2">Inizia ora: risultato immediato, valore concreto.</h3>
+                    <p class="mb-3">Prova il test per capire il tuo punto di partenza.</p>
+
+                    <a href="{% url 'assessments:tests-list' %}" class="btn btn-primary action-btn">Prova il test ora</a>
+                    {% if not user.is_authenticated %}
+                        <p class="small text-muted mt-3 mb-0">Alla fine del test potrai registrarti per salvare i risultati, monitorare i progressi e ricevere indicazioni personalizzate.</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
