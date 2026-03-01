@@ -10,9 +10,9 @@
             <div class="collapse navbar-collapse" id="mainNavbar">
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-4 mt-3 mt-lg-0">
                     <li class="nav-item"><a href="{% url 'home-index' %}" data-nav-target="home" class="nav-link nav-link-ux {% if request.path == '/' %}is-active{% endif %}">Home</a></li>
-                    <li class="nav-item"><a href="#metodo" data-nav-target="metodo" class="nav-link nav-link-ux">Metodo</a></li>
-                    <li class="nav-item"><a href="#test" data-nav-target="test" class="nav-link nav-link-ux">Test</a></li>
-                    <li class="nav-item"><a href="#testimonials" data-nav-target="testimonials" class="nav-link nav-link-ux">Testimonianze</a></li>
+                    <li class="nav-item"><a href="{% url 'home-index' %}#metodo" data-nav-target="metodo" class="nav-link nav-link-ux">Metodo</a></li>
+                    <li class="nav-item"><a href="{% url 'home-index' %}#test" data-nav-target="test" class="nav-link nav-link-ux">Test</a></li>
+                    <li class="nav-item"><a href="{% url 'home-index' %}#testimonials" data-nav-target="testimonials" class="nav-link nav-link-ux">Testimonianze</a></li>
                     {% if request.user.is_authenticated %}
                         <li class="nav-item"><a href="{% url 'accounts:profile' %}" class="nav-link nav-link-ux">Profilo</a></li>
                         {% if request.user.is_superuser %}

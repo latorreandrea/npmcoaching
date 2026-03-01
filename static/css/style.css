@@ -140,11 +140,19 @@ section[id] {
 }
 
 .cta-btn-main:hover,
-.action-btn:hover {
-    background: var(--secondary);
-    border-color: var(--secondary);
+.cta-btn-main:focus-visible,
+.action-btn:hover,
+.action-btn:focus-visible {
+    background: var(--primary);
+    border-color: var(--primary);
     color: #fff;
-    transform: translateY(-1px);
+    transform: translateY(-1px) scale(1.02);
+    animation: nextStepGlowPulse 1.15s ease-in-out infinite;
+}
+
+.cta-btn-main:active,
+.action-btn:active {
+    transform: translateY(0) scale(0.99);
 }
 
 .action-btn-outline {
@@ -486,7 +494,7 @@ section[id] {
 .method-steps::after {
     top: var(--method-line-top);
     height: var(--method-progress-height);
-    background: var(--secondary);
+    background: var(--primary);
     transition: height 0.35s ease;
 }
 
@@ -552,15 +560,15 @@ section[id] {
 }
 
 .method-step.is-active .method-step-index {
-    background: var(--secondary);
-    border-color: var(--secondary);
+    background: var(--primary);
+    border-color: var(--primary);
     color: #fff;
 }
 
 .method-step.is-active .method-step-card {
-    background: var(--secondary);
-    border-color: var(--secondary);
-    box-shadow: 0 18px 38px rgba(80, 144, 30, 0.28);
+    background: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 20px 42px rgba(81, 129, 167, 0.34);
 }
 
 .method-step.is-active .method-step-card h3,
@@ -1090,10 +1098,14 @@ section[id] {
 @keyframes nextStepGlowPulse {
     0%,
     100% {
-        box-shadow: 0 0 0 rgba(81, 129, 167, 0), 0 10px 25px rgba(81, 129, 167, 0.25);
+        box-shadow: 0 0 0 rgba(81, 129, 167, 0), 0 14px 30px rgba(81, 129, 167, 0.26);
     }
     50% {
-        box-shadow: 0 0 0.55rem rgba(81, 129, 167, 0.5), 0 0 1.2rem rgba(81, 129, 167, 0.38), 0 12px 28px rgba(81, 129, 167, 0.34);
+        box-shadow:
+            0 0 1rem rgba(81, 129, 167, 0.42),
+            0 0 2.4rem rgba(81, 129, 167, 0.3),
+            0 0 3.8rem rgba(81, 129, 167, 0.2),
+            0 16px 36px rgba(81, 129, 167, 0.36);
     }
 }
 
@@ -1132,6 +1144,8 @@ html {
     .answer-choice-label::after,
     .answer-choice-input:checked + .answer-choice-label,
     .answer-choice-input:checked + .answer-choice-label::after,
+    .cta-btn-main,
+    .action-btn,
     .next-step-btn {
         animation: none !important;
     }

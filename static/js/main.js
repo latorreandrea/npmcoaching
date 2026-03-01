@@ -203,12 +203,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, { passive: true });
 
-    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+    document.querySelectorAll('a[href*="#"]').forEach((anchor) => {
         anchor.addEventListener('click', (event) => {
-            const targetId = anchor.getAttribute('href');
-            if (!targetId || targetId === '#') {
+            const rawHref = anchor.getAttribute('href');
+            if (!rawHref || rawHref === '#') {
                 return;
             }
+
+            const linkUrl = new URL(rawHref, window.location.origin);
+            if (!linkUrl.hash) {
+                return;
+            }
+
+            const samePage = linkUrl.pathname === window.location.pathname;
+            if (!samePage) {
+                return;
+            }
+
+            const targetId = linkUrl.hash;
 
             const target = document.querySelector(targetId);
             if (!target) {
