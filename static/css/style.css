@@ -251,7 +251,7 @@ section[id] {
    6) Generic Sections
 ======================================== */
 .section {
-    padding: 7rem 0;
+    padding: 4.75rem 0;
 }
 
 .section-light {
@@ -641,7 +641,7 @@ section[id] {
     background: #0f172a;
     color: #cbd5e1;
     position: relative;
-    margin-top: 1rem;
+    margin-top: 7rem;
 }
 
 .footer-wave-top {
@@ -827,6 +827,27 @@ section[id] {
 
 .cookie-settings-actions {
     margin-top: 0.5rem;
+}
+
+.result-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.result-action-btn {
+    width: min(100%, 420px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.result-action-btn-outline {
+    border-radius: 999px;
+    padding: 0.72rem 1.5rem;
+    font-weight: 600;
 }
 
 /* ========================================
@@ -1054,6 +1075,14 @@ html {
     16) Responsive: Tablet/Mobile
 ======================================== */
 @media (max-width: 991.98px) {
+    .site-footer-dark {
+        margin-top: 6rem;
+    }
+
+    .section {
+        padding: 1.5rem 0;
+    }
+
     .container,
     .container-fluid {
         max-width: 100%;
@@ -1155,6 +1184,14 @@ html {
 }
 
 @media (max-width: 575.98px) {
+    .site-footer-dark {
+        margin-top: 5.25rem;
+    }
+
+    .section {
+        padding: 0.9rem 0;
+    }
+
     .section-title,
     .section-description,
     .method-step-card h3,

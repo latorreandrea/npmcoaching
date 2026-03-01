@@ -24,13 +24,15 @@
                         <div class="alert alert-info mt-3" role="alert">
                             Risultato temporaneo in modalità ospite. Per privacy e sicurezza viene conservato per un periodo limitato.
                         </div>
-                        <div class="d-flex flex-wrap gap-2 mt-2">
-                            <a href="{% url 'account_signup' %}?next={{ request.path|urlencode }}" class="btn btn-primary action-btn">Crea account e salva risultato</a>
-                            <a href="{% url 'account_login' %}?next={{ request.path|urlencode }}" class="btn btn-outline-secondary">Hai già un account? Accedi</a>
+                        <div class="result-actions mt-2">
+                            <a href="{% url 'account_signup' %}?next={{ request.path|urlencode }}" class="btn btn-primary action-btn result-action-btn">Crea account e salva risultato</a>
+                            <a href="{% url 'account_login' %}?next={{ request.path|urlencode }}" class="btn btn-outline-secondary result-action-btn result-action-btn-outline">Hai già un account? Accedi</a>
                         </div>
                     {% endif %}
 
-                    <a href="{% url 'assessments:tests-list' %}" class="btn btn-primary action-btn mt-2">Torna ai test</a>
+                    <div class="result-actions mt-3">
+                        <a href="{% url 'assessments:tests-list' %}" class="btn btn-primary action-btn result-action-btn">Torna ai test</a>
+                    </div>
                 </div>
             </div>
         </div>
