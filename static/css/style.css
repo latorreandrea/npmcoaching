@@ -355,7 +355,12 @@ section[id] {
 }
 
 .answer-choice-input {
-    cursor: pointer;
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    pointer-events: none;
 }
 
 .answer-choice-label {
@@ -399,6 +404,57 @@ section[id] {
 
 .answer-choice-input:checked + .answer-choice-label::after {
     animation: answerChoiceFlash 0.32s ease-out;
+}
+
+.answer-choice-input:focus-visible + .answer-choice-label {
+    box-shadow: 0 0 0 0.18rem rgba(81, 129, 167, 0.28);
+}
+
+.next-step-wrap {
+    display: flex;
+    justify-content: center;
+}
+
+.next-step-btn {
+    min-width: 13.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+}
+
+.next-step-btn:hover,
+.next-step-btn:focus-visible,
+.next-step-btn:active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    animation: nextStepGlowPulse 1.15s ease-in-out infinite;
+}
+
+.next-step-btn:hover {
+    transform: translateY(-1px);
+}
+
+.next-step-btn:active {
+    transform: scale(0.985);
+}
+
+.test-progress-wrap {
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.test-progress {
+    height: 0.38rem;
+    border-radius: 999px;
+    background: rgba(31, 41, 55, 0.12);
+}
+
+.test-progress .progress-bar {
+    background: var(--primary);
+    border-radius: 999px;
 }
 
 .method-steps {
@@ -641,7 +697,6 @@ section[id] {
     background: #0f172a;
     color: #cbd5e1;
     position: relative;
-    margin-top: 7rem;
 }
 
 .footer-wave-top {
@@ -1032,6 +1087,16 @@ section[id] {
     }
 }
 
+@keyframes nextStepGlowPulse {
+    0%,
+    100% {
+        box-shadow: 0 0 0 rgba(81, 129, 167, 0), 0 10px 25px rgba(81, 129, 167, 0.25);
+    }
+    50% {
+        box-shadow: 0 0 0.55rem rgba(81, 129, 167, 0.5), 0 0 1.2rem rgba(81, 129, 167, 0.38), 0 12px 28px rgba(81, 129, 167, 0.34);
+    }
+}
+
 /* ========================================
     14) Global Scroll Behavior
 ======================================== */
@@ -1066,7 +1131,8 @@ html {
     .answer-choice-label,
     .answer-choice-label::after,
     .answer-choice-input:checked + .answer-choice-label,
-    .answer-choice-input:checked + .answer-choice-label::after {
+    .answer-choice-input:checked + .answer-choice-label::after,
+    .next-step-btn {
         animation: none !important;
     }
 }
@@ -1075,10 +1141,6 @@ html {
     16) Responsive: Tablet/Mobile
 ======================================== */
 @media (max-width: 991.98px) {
-    .site-footer-dark {
-        margin-top: 6rem;
-    }
-
     .section {
         padding: 1.5rem 0;
     }
@@ -1184,10 +1246,6 @@ html {
 }
 
 @media (max-width: 575.98px) {
-    .site-footer-dark {
-        margin-top: 5.25rem;
-    }
-
     .section {
         padding: 0.9rem 0;
     }
