@@ -767,14 +767,39 @@ Notes:
 
 Before go-live, complete this checklist:
 
-- Configure a scheduler (cron/Cloud Scheduler/Heroku Scheduler) to run:
-  - `python manage.py cleanup_guest_test_results`
-- Confirm retention env vars in production:
-  - `ASSESSMENTS_GUEST_RESULT_RETENTION_DAYS`
-  - `ASSESSMENTS_GUEST_CONSENT_POLICY_VERSION`
-- Verify legal pages are aligned with final legal copy (privacy/cookie + guest retention and consent wording).
-- Validate operational GDPR flow:
-  - data export/deletion request handling
-  - support procedure for consent audit logs
+- [ ] **P0 - Session-only guest flow validated**
+  - [ ] Verify that guest results are never written to the database without login/registration.
+  - [ ] Verify that guest results disappear when the session ends.
+  - [ ] Verify that after login/registration, persistent save happens only once.
+
+- [ ] **P0 - Technical cookie compliance**
+  - [ ] Block non-essential scripts before consent.
+  - [ ] Confirm that rejection keeps only essential technical cookies.
+  - [ ] Test cookie preference updates and persistence of user choice.
+
+- [ ] **P0 - Privacy/Cookie/Terms consistency**
+  - [ ] Confirm consistent wording across privacy, cookie, and terms pages for the session-only guest flow.
+  - [ ] Add policy version and last-updated date on every legal page.
+  - [ ] Add an official contact for privacy requests (dedicated email).
+
+- [ ] **P1 - Data subject rights (GDPR arts. 15-22)**
+  - [ ] Define a process for data access requests (user export).
+  - [ ] Define a process for rectification/erasure/restriction.
+  - [ ] Define response SLAs for privacy requests.
+
+- [ ] **P1 - Security and accountability**
+  - [ ] Verify production security settings (`SECURE_SSL_REDIRECT`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, HSTS).
+  - [ ] Define and document retention for registered-user data (non-guest).
+  - [ ] Define incident response and data breach notification procedures (arts. 33-34).
+
+- [ ] **P2 - Legal/vendor governance**
+  - [ ] Map third-party providers (hosting, social login, email, analytics).
+  - [ ] Verify DPAs/agreements and extra-EU transfer mechanisms where applicable.
+  - [ ] Update the Record of Processing Activities (RoPA) with purposes, legal bases, data categories, and retention periods.
+
+- [ ] **P2 - Continuous compliance QA**
+  - [ ] Add automated checks for critical legal content (minimum required copy).
+  - [ ] Include GDPR review in the release checklist before every deployment.
+  - [ ] Schedule periodic audits (quarterly) for policies and data flows.
 
 ## Credits

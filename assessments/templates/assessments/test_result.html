@@ -22,7 +22,7 @@
 
                     {% if is_guest_result %}
                         <div class="alert alert-info mt-3" role="alert">
-                            Risultato temporaneo in modalità ospite. Per privacy e sicurezza viene conservato per un periodo limitato.
+                               Risultato temporaneo in modalità ospite. Il risultato resta disponibile solo per questa sessione.
                         </div>
                         <div class="result-actions mt-2">
                             <a href="{% url 'account_signup' %}?next={{ request.path|urlencode }}" class="btn btn-primary action-btn result-action-btn">Crea account e salva risultato</a>

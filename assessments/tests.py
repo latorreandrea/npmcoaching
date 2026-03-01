@@ -1,13 +1,8 @@
-from datetime import timedelta
-from io import StringIO
-
 from django.contrib.auth import get_user_model
-from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
-from django.utils import timezone
 
-from .models import Answer, GuestConsentLog, PersonalityProfile, Question, Test, TestResult
+from .models import Answer, PersonalityProfile, Question, Test, TestResult
 
 
 class AssessmentsGuestAndUserFlowTests(TestCase):
@@ -55,33 +50,31 @@ class AssessmentsGuestAndUserFlowTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "assessments/tests_list.html")
 
-    def test_guest_can_take_test_and_view_own_result(self):
+    def test_guest_can_take_test_and_view_own_session_result(self):
         response = self._post_test(self.client, self.answer_high)
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("assessments:guest-test-result"))
 
-        result = TestResult.objects.latest("id")
-        self.assertTrue(result.is_guest)
-        self.assertIsNone(result.user)
-        self.assertTrue(result.session_key)
+        self.assertEqual(TestResult.objects.count(), 0)
+        self.assertIn("assessments_guest_result", self.client.session)
 
-        result_page = self.client.get(reverse("assessments:test-result", args=[result.id]))
+        result_page = self.client.get(reverse("assessments:guest-test-result"))
         self.assertEqual(result_page.status_code, 200)
         self.assertContains(result_page, "Risultato temporaneo in modalità ospite")
-        self.assertEqual(GuestConsentLog.objects.filter(test=self.test_obj).count(), 1)
+        self.assertContains(result_page, "resta disponibile solo per questa sessione")
 
     def test_guest_submit_requires_explicit_consent(self):
         response = self._post_test(self.client, self.answer_high, guest_consent=False)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "devi accettare Privacy e Cookie Policy")
         self.assertEqual(TestResult.objects.count(), 0)
-        self.assertEqual(GuestConsentLog.objects.count(), 0)
+        self.assertNotIn("assessments_guest_result", self.client.session)
 
     def test_guest_cannot_view_result_from_other_session(self):
         self._post_test(self.client, self.answer_high)
-        result = TestResult.objects.latest("id")
 
         second_client = self.client_class()
-        response = second_client.get(reverse("assessments:test-result", args=[result.id]))
+        response = second_client.get(reverse("assessments:guest-test-result"))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("assessments:tests-list"))
 
@@ -97,17 +90,26 @@ class AssessmentsGuestAndUserFlowTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn(reverse("account_login"), response.url)
 
-    def test_guest_results_are_claimed_after_login_same_session(self):
+    def test_guest_result_is_saved_for_user_after_login_on_guest_page(self):
         self._post_test(self.client, self.answer_low)
-        guest_result = TestResult.objects.latest("id")
+        self.assertEqual(TestResult.objects.count(), 0)
 
         self.client.login(username="utente_assessment", password="PasswordSicura123!")
+        response = self.client.get(reverse("assessments:guest-test-result"))
+        self.assertEqual(response.status_code, 302)
 
-        guest_result.refresh_from_db()
-        self.assertEqual(guest_result.user_id, self.user.id)
-        self.assertFalse(guest_result.is_guest)
-        self.assertEqual(guest_result.session_key, "")
-        self.assertIsNone(guest_result.expires_at)
+        saved_result = TestResult.objects.latest("id")
+        self.assertEqual(saved_result.user_id, self.user.id)
+        self.assertFalse(saved_result.is_guest)
+        self.assertEqual(saved_result.score, self.answer_low.points)
+        self.assertNotIn("assessments_guest_result", self.client.session)
+        self.assertEqual(response.url, reverse("assessments:test-result", args=[saved_result.id]))
+
+    def test_authenticated_user_final_submit_creates_persistent_result(self):
+        self.client.login(username="utente_assessment", password="PasswordSicura123!")
+        response = self._post_test(self.client, self.answer_high)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(TestResult.objects.filter(user=self.user).count(), 1)
 
     @override_settings(
         ASSESSMENTS_GUEST_RATE_LIMIT_COUNT=1,
@@ -178,70 +180,5 @@ class AssessmentsGuestAndUserFlowTests(TestCase):
             },
         )
         self.assertEqual(final_submit.status_code, 302)
-        self.assertEqual(TestResult.objects.count(), 1)
-
-    @override_settings(ASSESSMENTS_GUEST_CONSENT_POLICY_VERSION="2026-03")
-    def test_guest_consent_log_saves_configured_policy_version(self):
-        response = self._post_test(self.client, self.answer_high)
-        self.assertEqual(response.status_code, 302)
-
-        consent = GuestConsentLog.objects.latest("id")
-        self.assertEqual(consent.policy_version, "2026-03")
-
-    @override_settings(ASSESSMENTS_GUEST_RESULT_RETENTION_DAYS=30)
-    def test_guest_result_expiration_respects_retention_setting(self):
-        response = self._post_test(self.client, self.answer_high)
-        self.assertEqual(response.status_code, 302)
-
-        result = TestResult.objects.latest("id")
-        self.assertIsNotNone(result.expires_at)
-        expected_min = timezone.now() + timedelta(days=30) - timedelta(seconds=5)
-        expected_max = timezone.now() + timedelta(days=30) + timedelta(seconds=5)
-        self.assertGreaterEqual(result.expires_at, expected_min)
-        self.assertLessEqual(result.expires_at, expected_max)
-
-    def test_expired_guest_result_is_not_accessible_even_same_session(self):
-        self._post_test(self.client, self.answer_high)
-        result = TestResult.objects.latest("id")
-        result.expires_at = timezone.now() - timedelta(seconds=1)
-        result.save(update_fields=["expires_at"])
-
-        response = self.client.get(reverse("assessments:test-result", args=[result.id]))
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("assessments:tests-list"))
-
-    def test_cleanup_command_deletes_only_expired_guest_results(self):
-        expired_guest = TestResult.objects.create(
-            user=None,
-            test=self.test_obj,
-            score=1,
-            personality=self.personality,
-            session_key="a" * 64,
-            is_guest=True,
-            expires_at=timezone.now() - timedelta(days=1),
-        )
-        active_guest = TestResult.objects.create(
-            user=None,
-            test=self.test_obj,
-            score=2,
-            personality=self.personality,
-            session_key="b" * 64,
-            is_guest=True,
-            expires_at=timezone.now() + timedelta(days=1),
-        )
-        user_result = TestResult.objects.create(
-            user=self.user,
-            test=self.test_obj,
-            score=3,
-            personality=self.personality,
-            is_guest=False,
-            expires_at=timezone.now() - timedelta(days=1),
-        )
-
-        output = StringIO()
-        call_command("cleanup_guest_test_results", stdout=output)
-
-        self.assertFalse(TestResult.objects.filter(id=expired_guest.id).exists())
-        self.assertTrue(TestResult.objects.filter(id=active_guest.id).exists())
-        self.assertTrue(TestResult.objects.filter(id=user_result.id).exists())
-        self.assertIn("Deleted 1 expired guest test result(s).", output.getvalue())
+        self.assertEqual(final_submit.url, reverse("assessments:guest-test-result"))
+        self.assertEqual(TestResult.objects.count(), 0)

@@ -1,19 +1,18 @@
 from urllib.parse import urlencode
-from datetime import timedelta
 from time import time
+from types import SimpleNamespace
 
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Max
 from django.conf import settings
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils import timezone
-
-from .models import Answer, GuestConsentLog, Question, Test, TestResult
-from .signals import claim_guest_results_for_user
-from .utils import session_fingerprint
+from .models import Answer, Question, Test, TestResult
 
 from .forms import AnswerForm, QuestionForm, TestForm
+
+
+GUEST_RESULT_SESSION_KEY = "assessments_guest_result"
 
 
 def test_list(request):
@@ -169,28 +168,23 @@ def take_test(request, test_id):
                 personality=personality,
             )
         else:
-            guest_fingerprint = session_fingerprint(_ensure_session_key(request))
-            GuestConsentLog.objects.create(
-                test=test,
-                session_key=guest_fingerprint,
-                policy_version=getattr(settings, "ASSESSMENTS_GUEST_CONSENT_POLICY_VERSION", "2026-02"),
-            )
-            result = TestResult.objects.create(
-                user=None,
-                test=test,
-                score=total_score,
-                personality=personality,
-                session_key=guest_fingerprint,
-                is_guest=True,
-                expires_at=timezone.now() + timedelta(days=getattr(settings, "ASSESSMENTS_GUEST_RESULT_RETENTION_DAYS", 14)),
-            )
-            request.session["assessments_guest_fingerprint"] = guest_fingerprint
+            request.session[GUEST_RESULT_SESSION_KEY] = {
+                "test_id": test.id,
+                "test_title": test.title,
+                "score": total_score,
+                "personality_id": personality.id if personality else None,
+                "personality_name": personality.name if personality else "",
+                "personality_description": personality.description if personality else "",
+            }
+            request.session.modified = True
 
         wizard_state = request.session.get(session_key, {})
         wizard_state.pop(str(test.id), None)
         request.session[session_key] = wizard_state
         request.session.modified = True
-        return redirect("assessments:test-result", result_id=result.id)
+        if request.user.is_authenticated:
+            return redirect("assessments:test-result", result_id=result.id)
+        return redirect("assessments:guest-test-result")
 
     current_question = questions[current_index]
     selected_answer_id = answers_map.get(str(current_question.id))
@@ -214,36 +208,66 @@ def take_test(request, test_id):
 def test_result(request, result_id):
     result = get_object_or_404(TestResult, id=result_id)
 
-    if result.user_id:
-        if not request.user.is_authenticated or result.user_id != request.user.id:
-            login_url = f"{reverse('account_login')}?{urlencode({'next': request.path})}"
-            return redirect(login_url)
-    else:
-        session_key = _ensure_session_key(request)
-        guest_fingerprint = session_fingerprint(session_key)
-        is_expired = result.expires_at and result.expires_at < timezone.now()
-        if not result.is_guest or result.session_key != guest_fingerprint or is_expired:
-            return redirect("assessments:tests-list")
-
-        if request.user.is_authenticated:
-            claim_guest_results_for_user(user=request.user, session_key=session_key)
-            result.refresh_from_db()
+    if not request.user.is_authenticated or result.user_id != request.user.id:
+        login_url = f"{reverse('account_login')}?{urlencode({'next': request.path})}"
+        return redirect(login_url)
 
     return render(
         request,
         "assessments/test_result.html",
         {
             "result": result,
-            "is_guest_result": not request.user.is_authenticated and result.is_guest,
+            "is_guest_result": False,
         },
     )
 
 
-def _ensure_session_key(request):
-    if not request.session.session_key:
-        request.session.save()
-    return request.session.session_key
+def guest_test_result(request):
+    payload = request.session.get(GUEST_RESULT_SESSION_KEY)
+    if not payload:
+        return redirect("assessments:tests-list")
 
+    if request.user.is_authenticated:
+        test = Test.objects.filter(id=payload.get("test_id"), is_active=True).first()
+        if not test:
+            request.session.pop(GUEST_RESULT_SESSION_KEY, None)
+            request.session.modified = True
+            return redirect("assessments:tests-list")
+
+        personality_id = payload.get("personality_id")
+        personality = test.personalities.filter(id=personality_id).first() if personality_id else None
+
+        result = TestResult.objects.create(
+            user=request.user,
+            test=test,
+            score=int(payload.get("score") or 0),
+            personality=personality,
+        )
+        request.session.pop(GUEST_RESULT_SESSION_KEY, None)
+        request.session.modified = True
+        return redirect("assessments:test-result", result_id=result.id)
+
+    result = SimpleNamespace(
+        score=int(payload.get("score") or 0),
+        test=SimpleNamespace(title=payload.get("test_title") or "Test"),
+        personality=(
+            SimpleNamespace(
+                name=payload.get("personality_name") or "",
+                description=payload.get("personality_description") or "",
+            )
+            if payload.get("personality_name")
+            else None
+        ),
+    )
+
+    return render(
+        request,
+        "assessments/test_result.html",
+        {
+            "result": result,
+            "is_guest_result": True,
+        },
+    )
 
 def _is_guest_rate_limited(request):
     limit = getattr(settings, "ASSESSMENTS_GUEST_RATE_LIMIT_COUNT", 5)
