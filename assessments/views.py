@@ -30,12 +30,80 @@ def test_list(request):
 
 def take_test(request, test_id):
     test = get_object_or_404(Test, id=test_id, is_active=True)
-    questions = test.questions.prefetch_related("answers").all()
+    questions = list(test.questions.prefetch_related("answers").all())
+    total_questions = len(questions)
+
+    if not total_questions:
+        return render(
+            request,
+            "assessments/take_test.html",
+            {
+                "test": test,
+                "questions": [],
+                "is_guest": not request.user.is_authenticated,
+            },
+        )
+
+    session_key = "assessments_test_wizard"
+    wizard_state = request.session.get(session_key, {})
+    test_state = wizard_state.get(str(test.id), {"index": 0, "answers": {}})
+    current_index = max(0, min(int(test_state.get("index", 0) or 0), total_questions - 1))
+    answers_map = test_state.get("answers", {}) if isinstance(test_state.get("answers", {}), dict) else {}
 
     if request.method == "POST":
-        total_score = 0
-        missing_questions = []
         is_guest = not request.user.is_authenticated
+        current_question = questions[current_index]
+        answer_id = request.POST.get(f"question_{current_question.id}")
+
+        if not answer_id:
+            return render(
+                request,
+                "assessments/take_test.html",
+                {
+                    "test": test,
+                    "questions": questions,
+                    "current_question": current_question,
+                    "current_step": current_index + 1,
+                    "total_steps": total_questions,
+                    "progress_percent": int(((current_index + 1) / total_questions) * 100),
+                    "selected_answer_id": None,
+                    "error_message": "Seleziona una risposta per continuare.",
+                    "is_guest": is_guest,
+                    "is_final_step": current_index == total_questions - 1,
+                },
+            )
+
+        answer = current_question.answers.filter(id=answer_id).first()
+        if not answer:
+            return render(
+                request,
+                "assessments/take_test.html",
+                {
+                    "test": test,
+                    "questions": questions,
+                    "current_question": current_question,
+                    "current_step": current_index + 1,
+                    "total_steps": total_questions,
+                    "progress_percent": int(((current_index + 1) / total_questions) * 100),
+                    "selected_answer_id": None,
+                    "error_message": "La risposta selezionata non è valida.",
+                    "is_guest": is_guest,
+                    "is_final_step": current_index == total_questions - 1,
+                },
+            )
+
+        answers_map[str(current_question.id)] = answer.id
+        test_state["answers"] = answers_map
+        wizard_state[str(test.id)] = test_state
+        request.session[session_key] = wizard_state
+        request.session.modified = True
+
+        if current_index < total_questions - 1:
+            test_state["index"] = current_index + 1
+            wizard_state[str(test.id)] = test_state
+            request.session[session_key] = wizard_state
+            request.session.modified = True
+            return redirect("assessments:take-test", test_id=test.id)
 
         if is_guest and request.POST.get("guest_consent") != "on":
             return render(
@@ -44,31 +112,34 @@ def take_test(request, test_id):
                 {
                     "test": test,
                     "questions": questions,
+                    "current_question": current_question,
+                    "current_step": current_index + 1,
+                    "total_steps": total_questions,
+                    "progress_percent": int(((current_index + 1) / total_questions) * 100),
+                    "selected_answer_id": answer.id,
                     "error_message": "Per continuare come ospite devi accettare Privacy e Cookie Policy.",
                     "is_guest": True,
+                    "is_final_step": True,
                 },
             )
 
+        total_score = 0
+        missing_answers = []
         for question in questions:
-            answer_id = request.POST.get(f"question_{question.id}")
-            if not answer_id:
-                missing_questions.append(question.id)
+            selected_id = answers_map.get(str(question.id))
+            selected_answer = question.answers.filter(id=selected_id).first()
+            if not selected_answer:
+                missing_answers.append(question.id)
                 continue
+            total_score += selected_answer.points
 
-            answer = question.answers.filter(id=answer_id).first()
-            if answer:
-                total_score += answer.points
-
-        if missing_questions:
-            return render(
-                request,
-                "assessments/take_test.html",
-                {
-                    "test": test,
-                    "questions": questions,
-                    "error_message": "Rispondi a tutte le domande prima di inviare il test.",
-                },
-            )
+        if missing_answers:
+            test_state["index"] = 0
+            test_state["answers"] = {}
+            wizard_state[str(test.id)] = test_state
+            request.session[session_key] = wizard_state
+            request.session.modified = True
+            return redirect("assessments:take-test", test_id=test.id)
 
         if is_guest and _is_guest_rate_limited(request):
             return render(
@@ -77,8 +148,14 @@ def take_test(request, test_id):
                 {
                     "test": test,
                     "questions": questions,
+                    "current_question": current_question,
+                    "current_step": current_index + 1,
+                    "total_steps": total_questions,
+                    "progress_percent": int(((current_index + 1) / total_questions) * 100),
+                    "selected_answer_id": answer.id,
                     "error_message": "Hai effettuato troppi invii in poco tempo. Riprova tra un minuto.",
                     "is_guest": True,
+                    "is_final_step": True,
                 },
             )
 
@@ -108,14 +185,27 @@ def take_test(request, test_id):
                 expires_at=timezone.now() + timedelta(days=getattr(settings, "ASSESSMENTS_GUEST_RESULT_RETENTION_DAYS", 14)),
             )
             request.session["assessments_guest_fingerprint"] = guest_fingerprint
+
+        wizard_state = request.session.get(session_key, {})
+        wizard_state.pop(str(test.id), None)
+        request.session[session_key] = wizard_state
+        request.session.modified = True
         return redirect("assessments:test-result", result_id=result.id)
 
+    current_question = questions[current_index]
+    selected_answer_id = answers_map.get(str(current_question.id))
     return render(
         request,
         "assessments/take_test.html",
         {
             "test": test,
             "questions": questions,
+            "current_question": current_question,
+            "current_step": current_index + 1,
+            "total_steps": total_questions,
+            "progress_percent": int(((current_index + 1) / total_questions) * 100),
+            "selected_answer_id": selected_answer_id,
+            "is_final_step": current_index == total_questions - 1,
             "is_guest": not request.user.is_authenticated,
         },
     )

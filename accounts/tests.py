@@ -21,6 +21,7 @@ class AccountUserFlowTests(TestCase):
 		response = self.client.get(reverse('accounts:profile'))
 		self.assertEqual(response.status_code, 302)
 		self.assertIn(reverse('account_login'), response.url)
+		self.assertIn('next=', response.url)
 
 	def test_profile_page_is_available_for_authenticated_user(self):
 		self.client.login(username='utente', password='PasswordSicura123!')
@@ -33,6 +34,7 @@ class AccountUserFlowTests(TestCase):
 		response = self.client.get(reverse('accounts:admin-dashboard'))
 		self.assertEqual(response.status_code, 302)
 		self.assertIn(reverse('account_login'), response.url)
+		self.assertIn('next=', response.url)
 
 	def test_admin_dashboard_is_available_for_superuser(self):
 		self.client.login(username='admin', password='PasswordSicura123!')
