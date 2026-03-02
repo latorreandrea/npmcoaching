@@ -1257,6 +1257,10 @@ html {
     .method-step-card h3 {
         font-size: 1.45rem;
     }
+
+    #final-cta.cta-section {
+        padding-bottom: 3rem;
+    }
 }
 
 @media (max-width: 575.98px) {
@@ -1291,6 +1295,10 @@ html {
 
     .method-step-card h3 {
         font-size: 1.25rem;
+    }
+
+    #final-cta.cta-section {
+        padding-bottom: 4rem;
     }
 }
 
