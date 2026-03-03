@@ -1,0 +1,42 @@
+steps:
+  - name: gcr.io/k8s-skaffold/pack
+    id: Buildpack
+    entrypoint: pack
+    args:
+      - build
+      - ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}
+      - --builder=gcr.io/buildpacks/builder:latest
+      - --network=cloudbuild
+      - --path=.
+
+  - name: gcr.io/cloud-builders/docker
+    id: Push
+    args:
+      - push
+      - ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    id: Deploy
+    entrypoint: gcloud
+    args:
+      - run
+      - services
+      - update
+      - ${_SERVICE_NAME}
+      - --platform=managed
+      - --region=${_DEPLOY_REGION}
+      - --image=${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}
+      - --quiet
+
+substitutions:
+  _AR_HOSTNAME: europe-west1-docker.pkg.dev
+  _AR_REPOSITORY: cloud-run-source-deploy
+  _DEPLOY_REGION: europe-west1
+  _SERVICE_NAME: coaching-webapp
+
+options:
+  substitutionOption: ALLOW_LOOSE
+  logging: CLOUD_LOGGING_ONLY
+
+images:
+  - ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}
