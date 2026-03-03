@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section section-muted">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <p class="section-kicker">Errore 500</p>
+                <h1 class="section-title">Si è verificato un problema</h1>
+                <p class="section-description mx-auto">
+                    C'è stato un errore interno del server.
+                    Riprova tra poco.
+                </p>
+                <p class="section-description mx-auto mt-2">
+                    Se il problema persiste, contatta l'amministrazione.
+                </p>
+                <a href="{% url 'home-index' %}" class="btn btn-primary action-btn mt-3">Torna alla home</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -19,6 +19,11 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+handler400 = 'coaching.views.bad_request'
+handler403 = 'coaching.views.permission_denied'
+handler404 = 'coaching.views.page_not_found'
+handler500 = 'coaching.views.server_error'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
