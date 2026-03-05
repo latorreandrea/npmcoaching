@@ -802,4 +802,4 @@ Before go-live, complete this checklist:
   - [ ] Include GDPR review in the release checklist before every deployment.
   - [ ] Schedule periodic audits (quarterly) for policies and data flows.
 
-## Credits
+## Credits 
