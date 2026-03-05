@@ -1,19 +1,17 @@
 steps:
-  - name: gcr.io/k8s-skaffold/pack
-    id: Buildpack
-    entrypoint: pack
+  - name: gcr.io/cloud-builders/docker
+    id: Build
     args:
       - build
-      - ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}
-      - --builder=gcr.io/buildpacks/builder:latest
-      - --network=cloudbuild
-      - --path=.
+      - -t
+      - ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${_SERVICE_NAME}:${COMMIT_SHA}
+      - .
 
   - name: gcr.io/cloud-builders/docker
     id: Push
     args:
       - push
-      - ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}
+      - ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${_SERVICE_NAME}:${COMMIT_SHA}
 
   - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
     id: Deploy
@@ -25,7 +23,7 @@ steps:
       - ${_SERVICE_NAME}
       - --platform=managed
       - --region=${_DEPLOY_REGION}
-      - --image=${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}
+      - --image=${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${_SERVICE_NAME}:${COMMIT_SHA}
       - --quiet
 
 substitutions:
@@ -39,4 +37,4 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 images:
-  - ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}
+  - ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${_SERVICE_NAME}:${COMMIT_SHA}
